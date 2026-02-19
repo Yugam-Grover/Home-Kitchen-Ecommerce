@@ -11,11 +11,11 @@
 - **Fonts:** Lora (Google), Satoshi (Local), Geist Mono (Local) integrated in `layout.tsx`
 - **Routing:** 28 routes scaffolded across 5 route groups (`(shop)`, `(account)`, `(seller)`, `(checkout)`, `(auth)`)
 - **Backend:** Supabase clients (Browser, Server, Admin) + `proxy.ts` edge logic
+- **Database:** `initial_schema` migration applied via Supabase MCP
 - **Security:** CSP, HSTS, Route Guards, RLS Policies defined in `schema.sql`
 - **Documentation:** Updated `architecture.md` with latest schema and route maps
 
 ### ⏳ Pending / In Progress
-- **Database:** `schema.sql` needs to be applied manually to Supabase (MCP auth issue)
 - **Env Vars:** Real keys need to be added to `.env.local`
 - **UI Components:** `wellness-ui` directory is created but empty
 
