@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { Lora, Inter } from 'next/font/google';
+import { Lora } from 'next/font/google';
+import localFont from 'next/font/local';
 
 import '@/styles/globals.css';
 
@@ -10,20 +11,29 @@ const lora = Lora({
   weight: ['400', '500', '600', '700'],
 });
 
-// Using Inter as temporary body font until Satoshi .woff2 files are provided
-// TODO: Replace with localFont({ src: '../../public/fonts/satoshi/Satoshi-Variable.woff2' })
-const inter = Inter({
-  subsets: ['latin'],
+const satoshi = localFont({
+  src: [
+    {
+      path: '../../public/fonts/satoshi/Satoshi-Variable.woff2',
+      style: 'normal',
+    },
+  ],
   display: 'swap',
   variable: '--font-body',
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
 });
 
-// TODO: Add Geist Mono local font when .woff2 files are provided
-// const geistMono = localFont({
-//   src: [{ path: '../../public/fonts/geist-mono/GeistMono-Variable.woff2', style: 'normal' }],
-//   display: 'swap',
-//   variable: '--font-mono',
-// });
+const geistMono = localFont({
+  src: [
+    {
+      path: '../../public/fonts/geist-mono/GeistMono-Variable.woff2',
+      style: 'normal',
+    },
+  ],
+  display: 'swap',
+  variable: '--font-mono',
+  fallback: ['SF Mono', 'Fira Code', 'monospace'],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -52,7 +62,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${lora.variable} ${inter.variable}`}
+      className={`${lora.variable} ${satoshi.variable} ${geistMono.variable}`}
     >
       <body>
         {children}

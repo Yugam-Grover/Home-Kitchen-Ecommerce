@@ -239,6 +239,15 @@ public/
 └── robots.txt
 ```
 
+### 2.3 Route Map
+| Route | Access | Purpose |
+|---|---|---|
+| `(account)/my-orders` | Auth | User order history (was /orders) |
+| `(account)/my-membership` | Auth | Membership mgmt (was /membership) |
+| `(seller)/seller-orders` | Seller | Seller order fulfillment (was /orders) |
+| `(seller)/seller-products` | Seller | Listing management (was /products) |
+
+
 > [!IMPORTANT]
 > **Hybrid Asset Strategy:** All UI icons (`/public/assets/icons/`), brand marks (`/public/assets/brand/`), payment logos, and illustrations are served locally from `/public/assets/` to preserve Cloudinary transformation credits exclusively for product media (hero images, PDP photography, 360° frame sequences). Cloudinary is **never** used for UI assets.
 
@@ -334,6 +343,73 @@ CREATE TABLE membership_history (
 );
 CREATE INDEX idx_membership_history_user ON membership_history(user_id, action);
 ```
+
+#### `categories`
+
+```sql
+CREATE TABLE categories (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        TEXT NOT NULL,
+  slug        TEXT UNIQUE NOT NULL,
+  parent_id   UUID REFERENCES categories(id),
+  image_url   TEXT,
+  description TEXT,
+  sort_order  INT DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+#### `addresses`
+
+```sql
+CREATE TABLE addresses (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type        TEXT CHECK (type IN ('shipping', 'billing')),
+  is_default  BOOLEAN DEFAULT FALSE,
+  name        TEXT NOT NULL,
+  line1       TEXT NOT NULL,
+  line2       TEXT,
+  city        TEXT NOT NULL,
+  state       TEXT NOT NULL,
+  postal_code TEXT NOT NULL,
+  country     TEXT NOT NULL,
+  phone       TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+#### `saved_items`
+
+```sql
+CREATE TABLE saved_items (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(id) ON DELETE CASCADE,
+  product_id  UUID REFERENCES products(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, product_id)
+);
+```
+
+#### `reviews`
+
+```sql
+CREATE TABLE reviews (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(id) ON DELETE SET NULL,
+  product_id  UUID REFERENCES products(id) ON DELETE CASCADE,
+  rating      INT CHECK (rating BETWEEN 1 AND 5),
+  title       TEXT,
+  body        TEXT,
+  is_verified_purchase BOOLEAN DEFAULT FALSE,
+  helpful_votes INT DEFAULT 0,
+  created_at  TIMESTAMPTZ DEFAULT now(),
+  updated_at  TIMESTAMPTZ DEFAULT now()
+);
+```
+
 
 #### `products`
 
@@ -1640,6 +1716,7 @@ export const WEBHOOK_HANDLERS: Record<string, (event: Stripe.Event) => Promise<v
 ```
 
 ---
+
 
 ## 10. Dependency Enforcement
 
