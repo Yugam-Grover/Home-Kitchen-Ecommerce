@@ -98,9 +98,9 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
         'Content-Security-Policy',
         [
             "default-src 'self'",
-            "script-src 'self' https://js.stripe.com https://challenges.cloudflare.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://challenges.cloudflare.com",
             "frame-src https://js.stripe.com https://hooks.stripe.com",
-            "img-src 'self' https://res.cloudinary.com data: blob:",
+            "img-src 'self' https://res.cloudinary.com https://images.unsplash.com data: blob:",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.typesense.io",
