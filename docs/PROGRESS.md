@@ -8,7 +8,7 @@
 ### ✅ Completed
 - **Project Init:** Next.js 16.1.6, Typescript, Tailwind 4.0, Turbopack
 - **Design System:** Full `@theme` implementation in `globals.css` (colors, type, spacing, motion)
-- **Fonts:** Lora (Google), Satoshi (Local), Geist Mono (Local) integrated in `layout.tsx`
+- **Fonts:** Lora (Google), Satoshi (Local), Geist Mono (Google due to Turbopack conflict) integrated
 - **Routing:** 28 routes scaffolded across 5 route groups (`(shop)`, `(account)`, `(seller)`, `(checkout)`, `(auth)`)
 - **Backend:** Supabase clients (Browser, Server, Admin) + `proxy.ts` edge logic
 - **Database:** `initial_schema` migration applied via Supabase MCP
@@ -22,7 +22,9 @@
 ### 📝 Key Decisions
 - **Route Renaming:** Renamed `(account)/membership` -> `my-membership`, `orders` -> `my-orders`, `(seller)/orders` -> `seller-orders`, `products` -> `seller-products` to avoid Next.js parallel route conflicts.
 - **Font Strategy:** Switched to `next/font/local` for Satoshi/Geist to avoid CLS and dependency on external CDNs (Privacy).
+- **Geist Mono Fallback:** Used `next/font/google` for Geist Mono to resolve a Turbopack hydration bug with the `geist` npm package.
 - **Schema Source:** `architecture.md` updated to be true source of truth, but `schema.sql` is the execution artifact.
 
 ### ⏭️ Next Phase
 - **Phase 2:** Design System Implementation (wellness-ui components)
+- **Known Issue:** `InvariantError` in console (Turbopack + Fonts) — harmless in dev, fix pending Next.js patch.
