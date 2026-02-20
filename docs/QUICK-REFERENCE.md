@@ -104,6 +104,7 @@ src/
 | Accordion | §4.6 | `wellness-ui/accordion.tsx` | ✅ Complete |
 | Testimonial Card | §4.7 | `wellness-ui/testimonial-card.tsx` | ✅ Complete |
 | Toast | §4.8 | `wellness-ui/toast.tsx` | ✅ Complete |
+| Toaster | — | `wellness-ui/toaster.tsx` | ✅ Complete |
 | Autocomplete | §4.9 | `wellness-ui/autocomplete.tsx` | ⬜ Not started |
 | Typo Correction | §4.10 | `wellness-ui/typo-correction.tsx` | ⬜ Not started |
 | Comparison Tray | §4.11 | `wellness-ui/comparison-tray.tsx` | ⬜ Not started |
