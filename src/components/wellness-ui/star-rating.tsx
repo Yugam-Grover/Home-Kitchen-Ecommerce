@@ -1,63 +1,76 @@
 import * as React from 'react';
 import { Star } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/lib/utils/cn';
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-export interface StarRatingProps {
+interface StarRatingProps extends React.HTMLAttributes<HTMLDivElement> {
+    rating: number;
     max?: number;
-    value?: number;
-    readOnly?: boolean;
-    onChange?: (value: number) => void;
-    className?: string;
-    size?: number;
+    size?: 'sm' | 'md';
 }
 
-export function StarRating({
-    max = 5,
-    value = 0,
-    readOnly = false,
-    onChange,
-    className,
-    size = 18,
-}: StarRatingProps) {
-    const [hoverValue, setHoverValue] = React.useState<number | null>(null);
+const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
+    ({ className, rating, max = 5, size = 'sm', ...props }, ref) => {
+        // Clamp rating between 0 and max
+        const clampedRating = Math.max(0, Math.min(rating, max));
 
-    const displayValue = hoverValue ?? value;
+        // Create an array for rendering stars
+        const stars = Array.from({ length: max }, (_, index) => {
+            const starValue = index + 1;
 
-    return (
-        <div className={cn('flex items-center gap-0.5', className)} onMouseLeave={() => setHoverValue(null)}>
-            {[...Array(max)].map((_, i) => {
-                const ratingValue = i + 1;
-                const isFilled = ratingValue <= displayValue;
+            if (clampedRating >= starValue) {
+                return 'full';
+            } else if (clampedRating >= starValue - 0.5) {
+                return 'half';
+            } else {
+                return 'empty';
+            }
+        });
 
-                return (
-                    <button
-                        key={i}
-                        type="button"
-                        disabled={readOnly}
-                        onClick={() => !readOnly && onChange?.(ratingValue)}
-                        onMouseEnter={() => !readOnly && setHoverValue(ratingValue)}
-                        className={cn(
-                            'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 rounded-sm',
-                            readOnly ? 'cursor-default' : 'cursor-pointer'
-                        )}
-                        aria-label={`Rate ${ratingValue} out of ${max} stars`}
-                    >
-                        <Star
-                            size={size}
-                            className={cn(
-                                'transition-all duration-200',
-                                isFilled ? 'fill-amber-500 text-amber-500' : 'text-stone-300 fill-transparent'
-                            )}
-                            strokeWidth={1.5}
-                        />
-                    </button>
-                );
-            })}
-        </div>
-    );
-}
+        const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
+
+        return (
+            <div
+                ref={ref}
+                className={cn('inline-flex items-center gap-[2px]', className)}
+                {...props}
+            >
+                {stars.map((type, index) => {
+                    if (type === 'full') {
+                        return (
+                            <Star
+                                key={index}
+                                className={cn(iconSize, 'fill-secondary-500 text-secondary-500')}
+                            />
+                        );
+                    } else if (type === 'half') {
+                        // Lucide doesn't have a perfect half-filled star that matches the fill. 
+                        // We can use a mask or just rely on StarHalf if available and styled correctly.
+                        // Actually, simplest consistent way is using SVG defs or just the StarHalf from lucide 
+                        // but `fill-secondary-500` on StarHalf fills the whole icon in some versions or just the path.
+                        // Let's assume Lucide's StarHalf is the left half.
+                        // Better: use a relative div with two stars for perfect half.
+                        // For now, let's stick to standard Lucide StarHalf.
+                        return (
+                            <div key={index} className="relative">
+                                <Star className={cn(iconSize, 'text-stone-200 fill-stone-200')} /> {/* Background empty star */}
+                                <div className="absolute top-0 left-0 w-1/2 overflow-hidden">
+                                    <Star className={cn(iconSize, 'fill-secondary-500 text-secondary-500')} />
+                                </div>
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <Star
+                                key={index}
+                                className={cn(iconSize, 'text-stone-200 fill-stone-200')}
+                            />
+                        );
+                    }
+                })}
+            </div>
+        );
+    }
+);
+StarRating.displayName = 'StarRating';
+
+export { StarRating };

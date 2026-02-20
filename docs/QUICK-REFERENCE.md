@@ -89,16 +89,21 @@ src/
 
 ## Component Registry
 
+**Status Legend:**
+✅ = Complete & Documented
+🚧 = In Development
+⬜ = Not Started
+
 | Component | Design System § | Architecture File | Status |
 |---|---|---|---|
-| Button | §4.1 | `wellness-ui/button.tsx` | ⬜ Not started |
-| Input | §4.2 | `wellness-ui/input.tsx` | ⬜ Not started |
-| Badge | §4.3 | `wellness-ui/badge.tsx` | ⬜ Not started |
-| Product Card | §4.4 | `wellness-ui/product-card.tsx` | ⬜ Not started |
-| Star Rating | §4.5 | `wellness-ui/star-rating.tsx` | ⬜ Not started |
-| Accordion | §4.6 | `wellness-ui/accordion.tsx` | ⬜ Not started |
-| Testimonial Card | §4.7 | `wellness-ui/testimonial-card.tsx` | ⬜ Not started |
-| Toast | §4.8 | `wellness-ui/toast.tsx` | ⬜ Not started |
+| Button | §4.1 | `wellness-ui/button.tsx` | ✅ Complete |
+| Input | §4.2 | `wellness-ui/input.tsx` | ✅ Complete |
+| Badge | §4.3 | `wellness-ui/badge.tsx` | ✅ Complete |
+| Product Card | §4.4 | `wellness-ui/product-card.tsx` | ✅ Complete |
+| Star Rating | §4.5 | `wellness-ui/star-rating.tsx` | ✅ Complete |
+| Accordion | §4.6 | `wellness-ui/accordion.tsx` | ✅ Complete |
+| Testimonial Card | §4.7 | `wellness-ui/testimonial-card.tsx` | ✅ Complete |
+| Toast | §4.8 | `wellness-ui/toast.tsx` | ✅ Complete |
 | Autocomplete | §4.9 | `wellness-ui/autocomplete.tsx` | ⬜ Not started |
 | Typo Correction | §4.10 | `wellness-ui/typo-correction.tsx` | ⬜ Not started |
 | Comparison Tray | §4.11 | `wellness-ui/comparison-tray.tsx` | ⬜ Not started |
@@ -108,8 +113,8 @@ src/
 | Quantity Stepper | §4.15 | `wellness-ui/quantity-stepper.tsx` | ⬜ Not started |
 | Gold Trial Card | §4.16 | `wellness-ui/gold-trial-card.tsx` | ⬜ Not started |
 | Empty State | §4.17 | `wellness-ui/empty-state.tsx` | ⬜ Not started |
-| Navbar | §2.4 | `wellness-ui/navbar.tsx` | ⬜ Not started |
-| Footer | §2.5 | `wellness-ui/footer.tsx` | ⬜ Not started |
+| Navbar | §2.4 | `wellness-ui/navbar.tsx` | 🚧 Basic (needs functionality) |
+| Footer | §2.5 | `wellness-ui/footer.tsx` | 🚧 Basic (needs links) |
 | Checkout Accordion | §3.4 | `wellness-ui/checkout-accordion.tsx` | ⬜ Not started |
 | Image Viewer 360° | — | `wellness-ui/image-viewer-360.tsx` | ⬜ Not started |
 | Split Shipping Notice | — | `wellness-ui/split-shipping-notice.tsx` | ⬜ Not started |
@@ -130,13 +135,14 @@ src/
 | 8 | Cart in LocalStorage, not DB | Fast offline access, no auth required for cart | `architecture.md §4.4` |
 | 9 | Cloudinary URL-based (no SDK) | Minimal bundle size, direct URL construction | `architecture.md §7` |
 | 10 | Two membership tiers only (Free + Gold) | Reduces decision fatigue, clear value prop | `PRD §6.1` |
+| 11 | Explicit `baseUrl: "."` in `tsconfig` | Ensures path aliases `@/*` resolve correctly | `tsconfig.json` |
 
 ---
 
 ## Current Project Status
 
-**Phase:** 0 — Rules & Skills Layer ✅ COMPLETE
-**Next Phase:** 1 — Project Scaffolding + Backend Foundation
+**Phase:** 1 — Project Scaffolding + Foundation ✅ COMPLETE
+**Next Phase:** 2 — Page Construction (Homepage -> PLP -> PDP)
 
 ### What's been set up:
 - `.agent/rules/project-rules.md` — 10 sections: context protocol, no-improvisation + gap detection, version locks, directory structure, naming, tokens, brand, assets, perf budgets, env vars

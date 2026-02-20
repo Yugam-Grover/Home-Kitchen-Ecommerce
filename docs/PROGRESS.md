@@ -1,30 +1,34 @@
 # Project Progress — Home & Kitchen Platform
 
-## Status: Phase 1 Complete (Scaffolding & Foundation)
+## Status: Phase 2 In Progress (Design System & Frontend)
 
-**Date:** 2026-02-19
-**Session Goal:** Initialize Next.js 16 project, Tailwind 4 design system, and Supabase backend foundation.
+**Date:** 2026-02-20
+**Session Goal:** Verify Design System implementation, fix module resolution issues, and prepare for page construction.
 
 ### ✅ Completed
 - **Project Init:** Next.js 16.1.6, Typescript, Tailwind 4.0, Turbopack
 - **Design System:** Full `@theme` implementation in `globals.css` (colors, type, spacing, motion)
-- **Fonts:** Lora (Google), Satoshi (Local), Geist Mono (Google due to Turbopack conflict) integrated
-- **Routing:** 28 routes scaffolded across 5 route groups (`(shop)`, `(account)`, `(seller)`, `(checkout)`, `(auth)`)
+- **Fonts:** Lora (Google), Satoshi (Local), Geist Mono (Google) integrated
+- **Routing:** 28 routes scaffolded across 5 route groups
 - **Backend:** Supabase clients (Browser, Server, Admin) + `proxy.ts` edge logic
 - **Database:** `initial_schema` migration applied via Supabase MCP
-- **Security:** CSP, HSTS, Route Guards, RLS Policies defined in `schema.sql`
-- **Documentation:** Updated `architecture.md` with latest schema and route maps
+- **Security:** CSP, RLS Policies defined in `schema.sql`
+- **Component Fixes:**
+    - `Badge`: Re-implemented with `forwardRef` and proper exports.
+    - `ProductCard`: Updated to import `BadgeVariant` type correctly.
+    - `Accordion`: Fixed `child.props` type safety issue.
+    - `tsconfig.json`: Added `"baseUrl": "."` to fix path aliases.
+- **Verification:** `tsc --noEmit` passes with 0 errors. Design Showcase page logic verified.
 
 ### ⏳ Pending / In Progress
 - **Env Vars:** Real keys need to be added to `.env.local`
-- **UI Components:** `wellness-ui` directory is created but empty
+- **UI Components:** ~50% compliant. Many placeholders in `wellness-ui` need full implementation against `design-system.md`.
+- **Pages:** Homepage, PLP, PDP, Checkout are currently empty/scaffolded.
 
 ### 📝 Key Decisions
-- **Route Renaming:** Renamed `(account)/membership` -> `my-membership`, `orders` -> `my-orders`, `(seller)/orders` -> `seller-orders`, `products` -> `seller-products` to avoid Next.js parallel route conflicts.
-- **Font Strategy:** Switched to `next/font/local` for Satoshi/Geist to avoid CLS and dependency on external CDNs (Privacy).
-- **Geist Mono Fallback:** Used `next/font/google` for Geist Mono to resolve a Turbopack hydration bug with the `geist` npm package.
-- **Schema Source:** `architecture.md` updated to be true source of truth, but `schema.sql` is the execution artifact.
+- **Module Resolution:** Enforced explicit `baseUrl` in `tsconfig` and consistent `export { Component }` pattern for all UI components to prevent resolution errors.
+- **Type Safety:** Strict strict-mode compliance enforced. No `any` casting allowed in component props.
 
 ### ⏭️ Next Phase
-- **Phase 2:** Design System Implementation (wellness-ui components)
-- **Known Issue:** `InvariantError` in console (Turbopack + Fonts) — harmless in dev, fix pending Next.js patch.
+- **Phase 3:** Page Construction (Homepage -> PLP -> PDP)
+- **Immediate Task:** Build the Homepage based on `design-system.md §3.1`.

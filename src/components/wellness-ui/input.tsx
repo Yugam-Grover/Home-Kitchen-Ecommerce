@@ -1,65 +1,80 @@
 import * as React from 'react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
+import { Search } from 'lucide-react';
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps
+    extends React.InputHTMLAttributes<HTMLInputElement> {
+    startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
+    variant?: 'default' | 'search' | 'pill';
+    label?: string;
     error?: string;
     helperText?: string;
-    leftIcon?: React.ReactNode;
-    rightIcon?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, error, helperText, leftIcon, rightIcon, ...props }, ref) => {
+    (
+        { className, type, startIcon, endIcon, variant = 'default', label, error, helperText, ...props },
+        ref
+    ) => {
+        // Base styles
+        const baseStyles =
+            'flex h-11 w-full border border-stone-200 bg-white px-4 py-2 text-base ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 font-sans';
+
+        // Variant styles
+        const variantStyles = {
+            default: 'rounded-xl',
+            search: 'rounded-full pl-12', // Extra padding for search icon
+            pill: 'rounded-full',
+        };
+
+        // Error styles
+        const errorStyles = error
+            ? 'border-semantic-error focus-visible:ring-semantic-error'
+            : '';
+
         return (
-            <div className="w-full">
+            <div className="w-full space-y-1.5">
+                {label && (
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-stone-700">
+                        {label}
+                    </label>
+                )}
                 <div className="relative">
-                    {leftIcon && (
+                    {variant === 'search' && (
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+                            <Search className="h-5 w-5" />
+                        </div>
+                    )}
+                    {startIcon && variant !== 'search' && (
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
-                            {leftIcon}
+                            {startIcon}
                         </div>
                     )}
                     <input
                         type={type}
                         className={cn(
-                            'flex h-11 w-full rounded-xl border bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-shadow',
-                            error
-                                ? 'border-red-500 focus-visible:ring-red-500'
-                                : 'border-stone-200',
-                            leftIcon && 'pl-10',
-                            rightIcon && 'pr-10',
+                            baseStyles,
+                            variantStyles[variant],
+                            errorStyles,
+                            startIcon && variant !== 'search' ? 'pl-12' : '',
+                            endIcon ? 'pr-10' : '',
                             className
                         )}
                         ref={ref}
-                        aria-invalid={!!error}
-                        aria-describedby={error ? 'input-error' : helperText ? 'input-helper' : undefined}
                         {...props}
                     />
-                    {rightIcon && !error && (
+                    {endIcon && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400">
-                            {rightIcon}
-                        </div>
-                    )}
-                    {error && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none">
-                            <AlertCircle size={18} />
+                            {endIcon}
                         </div>
                     )}
                 </div>
-                {error && (
-                    <p id="input-error" className="mt-1.5 text-xs font-medium text-red-600 flex items-center gap-1" role="alert">
-                        {error}
-                    </p>
+                {helperText && !error && (
+                    <p className="text-xs text-stone-500">{helperText}</p>
                 )}
-                {!error && helperText && (
-                    <p id="input-helper" className="mt-1.5 text-xs text-stone-500">
-                        {helperText}
-                    </p>
+                {error && (
+                    <p className="text-sm font-medium text-semantic-error">{error}</p>
                 )}
             </div>
         );

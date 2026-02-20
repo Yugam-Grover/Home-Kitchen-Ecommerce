@@ -1,44 +1,54 @@
 import * as React from 'react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { StarRating } from './star-rating';
-
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
+import { Quote } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
+import { StarRating } from '@/components/wellness-ui/star-rating';
 
 export interface TestimonialCardProps {
-    quote: string;
     author: string;
     location?: string;
+    quote: string;
     rating?: number;
     className?: string;
 }
 
-export function TestimonialCard({ quote, author, location, rating = 5, className }: TestimonialCardProps) {
+export function TestimonialCard({
+    author,
+    location,
+    quote,
+    rating = 5,
+    className,
+}: TestimonialCardProps) {
     return (
-        <div className={cn("relative flex flex-col items-center justify-center p-8 text-center", className)}>
-            {/* Decorative Quote Mark */}
-            <span className="absolute left-1/2 top-0 -translate-x-1/2 transform text-[120px] leading-none text-amber-100 -z-10 font-serif opacity-50">
-                &ldquo;
-            </span>
-
+        <div
+            className={cn(
+                'relative flex flex-col items-center justify-center rounded-2xl bg-white p-8 text-center shadow-sm transition-shadow hover:shadow-md',
+                className
+            )}
+        >
+            {/* Content */}
             <div className="relative z-10 flex flex-col items-center gap-6">
-                <StarRating value={rating} readOnly size={20} />
+                <StarRating rating={rating} size="sm" />
 
-                <blockquote className="font-serif text-xl sm:text-2xl italic leading-relaxed text-stone-900 max-w-2xl">
-                    "{quote}"
+                <blockquote className="font-serif text-2xl italic leading-relaxed text-stone-900 sm:text-3xl">
+                    &ldquo;{quote}&rdquo;
                 </blockquote>
 
                 <div className="flex flex-col items-center">
-                    <cite className="font-sans text-sm font-bold uppercase tracking-widest text-stone-900 not-italic">
+                    <cite className="font-sans text-base font-semibold not-italic text-stone-900">
                         {author}
                     </cite>
                     {location && (
-                        <span className="text-xs text-stone-500 mt-1">{location}</span>
+                        <span className="font-sans text-xs text-stone-500">
+                            {location}
+                        </span>
                     )}
                 </div>
             </div>
+
+            {/* Decorative Quote Mark Background */}
+            <span className="absolute bottom-4 right-6 text-[160px] leading-none text-secondary-500/30 font-serif select-none pointer-events-none italic z-0">
+                &rdquo;
+            </span>
         </div>
     );
 }

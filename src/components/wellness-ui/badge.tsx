@@ -1,49 +1,52 @@
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils/cn';
 
-import React from 'react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+const badgeVariants = cva(
+    'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-stone-950 focus:ring-offset-2 font-sans',
+    {
+        variants: {
+            variant: {
+                default:
+                    'border-transparent bg-primary-500 text-stone-50 hover:bg-primary-500/80',
+                secondary:
+                    'border-transparent bg-secondary-500 text-white hover:bg-secondary-500/80',
+                outline: 'text-stone-950',
+                destructive:
+                    'border-transparent bg-semantic-error text-stone-50 hover:bg-semantic-error/80',
+                success:
+                    'border-transparent bg-semantic-success text-white hover:bg-semantic-success/80',
+                warning:
+                    'border-transparent bg-semantic-warning text-white hover:bg-semantic-warning/80',
+                // Specific semantic badges from Design System
+                discount: 'border-transparent bg-semantic-success text-white',
+                new: 'border-transparent bg-secondary-500 text-white',
+                'low-stock': 'border-transparent bg-amber-100 text-amber-800',
+                'out-of-stock': 'border-transparent bg-red-100 text-red-800',
+                'gold-member': 'border-transparent bg-amber-100 text-amber-900',
+                certification: 'border-primary-200 bg-primary-50 text-primary-900',
+            },
+            size: {
+                sm: 'px-2 py-[2px] text-[11px]',
+                md: 'px-3 py-1 text-sm',
+                lg: 'px-4 py-1.5 text-base',
+            }
+        },
+        defaultVariants: {
+            variant: 'default',
+            size: 'md',
+        },
+    }
+);
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
+export interface BadgeProps
+    extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> { }
 
-export type BadgeVariant =
-    | 'discount'
-    | 'new'
-    | 'low-stock'
-    | 'out-of-stock'
-    | 'gold-member'
-    | 'early-access'
-    | 'certification'
-    | 'default';
-
-interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-    variant?: BadgeVariant;
-    children: React.ReactNode;
-}
-
-export function Badge({ className, variant = 'default', children, ...props }: BadgeProps) {
-    const variants: Record<string, string> = {
-        discount: 'bg-green-100 text-green-800 border-green-200',
-        new: 'bg-amber-100 text-amber-800 border-amber-200',
-        'low-stock': 'bg-orange-100 text-orange-800 border-orange-200',
-        'out-of-stock': 'bg-red-100 text-red-800 border-red-200',
-        'gold-member': 'bg-amber-50 text-amber-600 border-amber-200 ring-1 ring-amber-300',
-        'early-access': 'bg-sage-100 text-sage-800 border-sage-200',
-        certification: 'bg-blue-50 text-blue-700 border-blue-200',
-        default: 'bg-stone-100 text-stone-800 border-stone-200',
-    };
-
+function Badge({ className, variant, size, ...props }: BadgeProps) {
     return (
-        <span
-            className={cn(
-                'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-                variants[variant] || variants.default,
-                className
-            )}
-            {...props}
-        >
-            {children}
-        </span>
+        <div className={cn(badgeVariants({ variant, size }), className)} {...props} />
     );
 }
+
+export { Badge, badgeVariants };
