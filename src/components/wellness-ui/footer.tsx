@@ -7,8 +7,11 @@ import { Button } from '@/components/wellness-ui/button';
 import { Input } from '@/components/wellness-ui/input';
 
 export function Footer() {
-    const currentYear = new Date().getFullYear();
+    const [currentYear, setCurrentYear] = React.useState('');
 
+    React.useEffect(() => {
+        setCurrentYear(new Date().getFullYear().toString());
+    }, []);
     return (
         <footer className="bg-stone-900 text-stone-200 pt-16 pb-8">
             <div className="container-standard w-full">

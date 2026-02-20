@@ -1,12 +1,37 @@
-export default function HomePage(): React.ReactElement {
+import {
+  HeroSlider,
+  TrendingProducts,
+  TestimonialsCarousel,
+  ShopTheLook,
+  RecentlyViewed,
+  CareGuideModal
+} from '@/components/external/dynamic-wrappers';
+import { BrandUspBand } from '@/components/wellness-ui/brand-usp-band';
+import { NewsletterCta } from '@/components/wellness-ui/newsletter-cta';
+import { ShopByCategory } from '@/components/wellness-ui/shop-by-category';
+
+export const metadata = {
+  title: 'Restorative Home & Kitchen',
+  description: 'Organic Modernist Living with Self-Sanitizing Surfaces.',
+};
+
+export default async function HomePage() {
+  // Use React 19's use cache for the server shell (though Dynamic components bypass this for JS delivery)
+  'use cache';
+
   return (
-    <main className="container-standard" style={{ paddingBlock: '96px' }}>
-      <h1 className="text-display-lg" style={{ marginBottom: '24px' }}>
-        Home &amp; Kitchen
-      </h1>
-      <p className="text-body-lg" style={{ color: 'var(--color-text-secondary)' }}>
-        Organic Modernist Living — Phase 1 scaffold complete.
-      </p>
+    <main className="flex flex-col min-h-screen bg-surface-default">
+      <HeroSlider />
+      <ShopByCategory />
+      <TrendingProducts />
+      <BrandUspBand />
+      <ShopTheLook />
+      <TestimonialsCarousel />
+      <NewsletterCta />
+
+      {/* Proactive Client Overlays */}
+      <RecentlyViewed />
+      <CareGuideModal />
     </main>
   );
 }
