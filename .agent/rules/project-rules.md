@@ -87,6 +87,8 @@ If you identify any of the following during development, STOP and alert the user
 | Typesense | `2.0.x` | `typesense-js` — search client |
 | Cloudinary | URL-based | No SDK. Direct URL construction via `cloudinaryUrl()` helper. |
 | Resend | `4.x` | Transactional email |
+| Radix UI | `1.x` | Unstyled accessible primitives (e.g., `@radix-ui/react-accordion`) |
+| cva / clsx / tailwind-merge | latest | Tailwind utility packages for component class construction |
 | Framer Motion | `12.x` | Dynamic import ONLY — never synchronous in above-fold |
 | GSAP | `3.12.x` | Dynamic import ONLY — isolated in `components/external/` |
 | Lucide React | latest | Icon library — `strokeWidth={1.5}`, `currentColor` |
