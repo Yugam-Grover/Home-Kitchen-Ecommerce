@@ -113,8 +113,15 @@ src/
 | Quantity Stepper | §4.15 | `wellness-ui/quantity-stepper.tsx` | ⬜ Not started |
 | Gold Trial Card | §4.16 | `wellness-ui/gold-trial-card.tsx` | ⬜ Not started |
 | Empty State | §4.17 | `wellness-ui/empty-state.tsx` | ⬜ Not started |
-| Navbar | §2.4 | `wellness-ui/navbar.tsx` | 🚧 Basic (needs functionality) |
-| Footer | §2.5 | `wellness-ui/footer.tsx` | 🚧 Basic (needs links) |
+| Navbar | §2.4 | `wellness-ui/navbar.tsx` | ✅ Complete |
+| Footer | §2.5 | `wellness-ui/footer.tsx` | ✅ Complete |
+| Breadcrumbs | — | `wellness-ui/breadcrumbs.tsx` | ✅ Complete |
+| Category Search | — | `wellness-ui/category-search.tsx` | ✅ Complete |
+| Checkbox | — | `wellness-ui/checkbox.tsx` | ✅ Complete |
+| Feature Section | — | `wellness-ui/feature-section.tsx` | ✅ Complete |
+| Product Carousel | — | `wellness-ui/product-carousel.tsx` | ✅ Complete |
+| Select | — | `wellness-ui/select.tsx` | ✅ Complete |
+| Slider | — | `wellness-ui/slider.tsx` | ✅ Complete |
 | Checkout Accordion | §3.4 | `wellness-ui/checkout-accordion.tsx` | ⬜ Not started |
 | Image Viewer 360° | — | `wellness-ui/image-viewer-360.tsx` | ⬜ Not started |
 | Split Shipping Notice | — | `wellness-ui/split-shipping-notice.tsx` | ⬜ Not started |
@@ -136,13 +143,14 @@ src/
 | 9 | Cloudinary URL-based (no SDK) | Minimal bundle size, direct URL construction | `architecture.md §7` |
 | 10 | Two membership tiers only (Free + Gold) | Reduces decision fatigue, clear value prop | `PRD §6.1` |
 | 11 | Explicit `baseUrl: "."` in `tsconfig` | Ensures path aliases `@/*` resolve correctly | `tsconfig.json` |
+| 12 | Next.js Font mapping to `<html>` tag | Ensures global CSS variables resolve correctly for Tailwind `@theme` inheritance. | `architecture` / `layout.tsx` |
 
 ---
 
 ## Current Project Status
 
-**Phase:** 1 — Project Scaffolding + Foundation ✅ COMPLETE
-**Next Phase:** 2 — Page Construction (Homepage -> PLP -> PDP)
+**Phase:** 2 — Design System & Components ✅ COMPLETE
+**Next Phase:** 3 — Page Construction (Homepage -> PLP -> PDP)
 
 ### What's been set up:
 - `.agent/rules/project-rules.md` — 10 sections: context protocol, no-improvisation + gap detection, version locks, directory structure, naming, tokens, brand, assets, perf budgets, env vars

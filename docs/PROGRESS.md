@@ -1,34 +1,31 @@
 # Project Progress — Home & Kitchen Platform
 
-## Status: Phase 2 In Progress (Design System & Frontend)
+## Status: Phase 2 Completed (Design System & Components)
 
 **Date:** 2026-02-20
-**Session Goal:** Verify Design System implementation, fix module resolution issues, and prepare for page construction.
+**Session Goal:** Finalize Design System implementation, fix Tailwind v4 integration issues, and complete `wellness-ui` primitives against design mockups.
 
 ### ✅ Completed
 - **Project Init:** Next.js 16.1.6, Typescript, Tailwind 4.0, Turbopack
 - **Design System:** Full `@theme` implementation in `globals.css` (colors, type, spacing, motion)
-- **Fonts:** Lora (Google), Satoshi (Local), Geist Mono (Google) integrated
-- **Routing:** 28 routes scaffolded across 5 route groups
-- **Backend:** Supabase clients (Browser, Server, Admin) + `proxy.ts` edge logic
-- **Database:** `initial_schema` migration applied via Supabase MCP
-- **Security:** CSP, RLS Policies defined in `schema.sql`
-- **Component Fixes:**
-    - `Badge`: Re-implemented with `forwardRef` and proper exports.
-    - `ProductCard`: Updated to import `BadgeVariant` type correctly.
-    - `Accordion`: Fixed `child.props` type safety issue.
-    - `tsconfig.json`: Added `"baseUrl": "."` to fix path aliases.
-- **Verification:** `tsc --noEmit` passes with 0 errors. Design Showcase page logic verified.
+- **Tailwind v4 Integration Debug**: Fixed unlayered vs layered CSS resets; restored functional color and typography variables globally by mapping Next.js fonts to `<html className="...">`.
+- **Backend:** Supabase clients (Browser, Server, Admin) + `proxy.ts`, base schema applied via MCP.
+- **Component Fixes & Polish:**
+    - `TestimonialCard`: Fixed quote mark orientation and opacity to match `Design_Inspirations` mockups.
+    - `Toast`: Restored high-contrast backgrounds, semantic left-borders, and pill-shaped action buttons.
+- **New UI Primitives Implemented:**
+    - `Slider`, `Select`, `Checkbox`, `Breadcrumbs`, `CategorySearch`, `FeatureSection`, `ProductCarousel`, `Toaster` with `use-toast` hook.
+- **Verification:** `tsc --noEmit` passes cleanly. Design Showcase page (`/design-showcase`) renders perfectly with all padding, margins, colors, and typographies aligned to mockups.
+- **Git:** Codebase committed and pushed to GitHub main branch.
 
 ### ⏳ Pending / In Progress
 - **Env Vars:** Real keys need to be added to `.env.local`
-- **UI Components:** ~50% compliant. Many placeholders in `wellness-ui` need full implementation against `design-system.md`.
-- **Pages:** Homepage, PLP, PDP, Checkout are currently empty/scaffolded.
+- **Pages:** Homepage, PLP, PDP, Checkout are currently empty/scaffolded. Functionality wiring needed.
 
 ### 📝 Key Decisions
-- **Module Resolution:** Enforced explicit `baseUrl` in `tsconfig` and consistent `export { Component }` pattern for all UI components to prevent resolution errors.
-- **Type Safety:** Strict strict-mode compliance enforced. No `any` casting allowed in component props.
+- **Typography Inheritance:** Next.js font variables (`lora.variable`, `satoshi.variable`) are applied to the `<html>` tag rather than `<body>` to allow Tailwind `@theme` CSS layer to access CSS custom properties globally.
+- **Module Resolution:** Enforced explicit `baseUrl` in `tsconfig` and consistent `export` blocks.
 
 ### ⏭️ Next Phase
-- **Phase 3:** Page Construction (Homepage -> PLP -> PDP)
-- **Immediate Task:** Build the Homepage based on `design-system.md §3.1`.
+- **Phase 3:** Page Construction 
+- **Immediate Task:** Build the Homepage based on `design-system.md §3.1` using the confirmed `Design_Inspirations` structure (Hero Slider, Trending Products Carousel, Testimonial Carousel, CTA).
