@@ -286,3 +286,6 @@ Return structured error responses with appropriate HTTP status codes:
 ### Above-Fold Rule
 
 Components rendered above the fold (hero, navbar, first product row) must NEVER synchronously import animation libraries. This is a **performance-blocking violation** (degrades LCP).
+
+**🚨 CRITICAL WARNING FOR PHASE 3 (HOMEPAGE HERO):**
+The Homepage Hero Slider must **NOT** use Framer Motion, GSAP, or any other JS animation library. It must be engineered using *pure CSS transitions and animations* tied to Tailwind v4 `@theme` variables (e.g., `var(--motion-slow)`). Using Framer Motion here will ruin the Largest Contentful Paint (LCP) metric. Reserve Framer Motion via `next/dynamic` exclusively for components further down the page like the Trending Products carousel or Testimonials.
