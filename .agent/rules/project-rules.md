@@ -176,6 +176,8 @@ src/
 
 Tailwind 4 does **NOT** use `tailwind.config.js`. All theming is done via `@theme` directive in `globals.css`. If you see any code referencing a Tailwind config file, it is WRONG.
 
+**Typography Mapping:** Next.js font variables (`lora.variable`, etc.) MUST be mapped to the `<html>` tag in `layout.tsx`, NOT the `<body>` tag. See `QUICK-REFERENCE.md` (Decision #12) for the overarching system rationale.
+
 ---
 
 ## 7. Brand Constraints
