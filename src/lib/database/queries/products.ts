@@ -20,6 +20,9 @@ export interface DbProduct {
     review_count: number;
     usp_badges: string[] | null;
     status: string;
+    narrative_blocks?: any;
+    faq_data?: any;
+    related_product_skus?: string[] | null;
     /** Sub-category name (most specific) */
     sub_category_name: string;
     /** Sub-category slug */
@@ -67,9 +70,9 @@ export async function getProductsBySubCategory(
             base_price_usd, compare_at_price_usd,
             material, material_details, rating_avg, review_count,
             usp_badges, status,
-            categories!inner (
+            category:category_id!inner (
                 id, name, slug,
-                parent:categories!parent_id (
+                parent:parent_id (
                     id, name, slug
                 )
             )
@@ -141,9 +144,9 @@ export async function getProductsByParentCategory(
             base_price_usd, compare_at_price_usd,
             material, material_details, rating_avg, review_count,
             usp_badges, status,
-            categories!inner (
+            category:category_id!inner (
                 id, name, slug,
-                parent:categories!parent_id (
+                parent:parent_id (
                     id, name, slug
                 )
             )
@@ -198,9 +201,9 @@ export async function getAllProducts(
             base_price_usd, compare_at_price_usd,
             material, material_details, rating_avg, review_count,
             usp_badges, status,
-            categories!inner (
+            category:category_id!inner (
                 id, name, slug,
-                parent:categories!parent_id (
+                parent:parent_id (
                     id, name, slug
                 )
             )
@@ -244,6 +247,42 @@ export async function getAllProducts(
 }
 
 /**
+ * Fetch a single product by its slug.
+ * Used on the Product Details Page (PDP).
+ */
+export async function getProductBySlug(slug: string): Promise<DbProduct | null> {
+    'use cache';
+    const supabase = createAnonSupabase();
+
+    const { data, error } = await supabase
+        .from('products')
+        .select(`
+            id, sku, name, slug, short_description,
+            base_price_usd, compare_at_price_usd,
+            material, material_details, rating_avg, review_count,
+            usp_badges, status, narrative_blocks, faq_data, related_product_skus,
+            category:category_id!inner (
+                id, name, slug,
+                parent:parent_id (
+                    id, name, slug
+                )
+            )
+        `)
+        .eq('slug', slug)
+        .eq('status', 'active')
+        .single();
+
+    if (error || !data) {
+        if (error?.code !== 'PGRST116') {
+            console.error(`Failed to fetch product by slug (${slug}):`, JSON.stringify(error, null, 2));
+        }
+        return null;
+    }
+
+    return mapRowToProduct(data);
+}
+
+/**
  * Derive filter facets from a set of products (client-side derivation).
  * Called with the full product set to build sidebar checkboxes.
  */
@@ -270,8 +309,9 @@ export function deriveFacets(products: DbProduct[]): ProductFacets {
 // ----- Internal Helpers -----
 
 function mapRowToProduct(row: any): DbProduct {
-    const cat = row.categories;
-    const parent = cat?.parent;
+    const cat = Array.isArray(row.category) ? row.category[0] : row.category;
+    // PostgREST may return joined records as an array or object
+    const parent = Array.isArray(cat?.parent) ? cat?.parent[0] : cat?.parent;
 
     return {
         id: row.id,
@@ -287,6 +327,9 @@ function mapRowToProduct(row: any): DbProduct {
         review_count: row.review_count,
         usp_badges: row.usp_badges,
         status: row.status,
+        narrative_blocks: row.narrative_blocks,
+        faq_data: row.faq_data,
+        related_product_skus: row.related_product_skus,
         sub_category_name: cat?.name || 'Uncategorized',
         sub_category_slug: cat?.slug || '',
         parent_category_name: parent?.name || 'Uncategorized',
