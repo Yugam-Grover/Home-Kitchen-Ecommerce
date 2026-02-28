@@ -35,6 +35,8 @@ export function RecentlyViewed() {
                         exit={{ opacity: 0, y: 50, scale: 0.95 }}
                         transition={{ type: 'tween', ease: 'easeOut', duration: 0.4 }}
                         className="fixed bottom-6 right-6 z-50 bg-white rounded-2xl shadow-xl border border-stone-200 p-4 w-[320px]"
+                        role="status"
+                        aria-live="polite"
                     >
                         <div className="flex items-center justify-between mb-3 border-b border-stone-100 pb-2">
                             <div className="flex items-center gap-2 text-stone-600 font-semibold text-sm">

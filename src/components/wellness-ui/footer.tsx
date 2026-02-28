@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mail, Instagram, Facebook, Twitter } from 'lucide-react';
 import { Button } from '@/components/wellness-ui/button';
 import { Input } from '@/components/wellness-ui/input';
@@ -17,10 +18,14 @@ export function Footer() {
             <div className="container-standard w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
                     {/* Brand Column */}
-                    <div className="space-y-6">
-                        <span className="font-serif text-2xl font-bold tracking-tight text-white italic">
-                            ANTIGRAVITY
-                        </span>
+                    <div className="space-y-6 ">
+                        <Image
+                            src="/assets/brand/logo-footer-v2.png"
+                            alt="Nestora Logo"
+                            width={386}
+                            height={101}
+                            className="h-[56px] md:h-[64px] w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+                        />
                         <p className="text-sm text-stone-400 leading-relaxed max-w-xs">
                             Organic Modernist home solutions for a restorative, safe, and minimalist lifestyle. Handcrafted excellence in every detail.
                         </p>

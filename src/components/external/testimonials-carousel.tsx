@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
+import { cn } from '@/lib/utils/cn';
+
 const mockTestimonials = [
     {
         id: 1,
@@ -29,69 +31,105 @@ const mockTestimonials = [
 ];
 
 export function TestimonialsCarousel() {
-    const [current, setCurrent] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
+    const handleIndexChange = (dir: 'next' | 'prev') => {
+        if (dir === 'next') setCurrentIndex(prev => prev + 1);
+        else setCurrentIndex(prev => prev - 1);
+    };
 
+    // Render 5 slots to guarantee smooth continuous sliding on edges without unmount collision limits
+    const slots = [-2, -1, 0, 1, 2];
 
     return (
         <LazyMotion features={domAnimation}>
-            <section className="bg-surface-warm w-full py-24 px-4 overflow-hidden relative">
-                <div className="container-narrow text-center relative z-10 w-full max-w-[800px] mx-auto">
+            <section className="bg-surface-warm w-full py-16 overflow-hidden relative">
+                <div className="container-standard relative z-10 w-full mx-auto flex flex-col items-center">
 
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-secondary-100 opacity-50 z-0 pointer-events-none" style={{ fontSize: '180px', lineHeight: 1, fontFamily: 'serif' }}>
-                        &ldquo;
+                    {/* Vertical Line & Heading */}
+                    <div className="flex flex-col items-center mb-8">
+                        <div className="w-[1px] h-8 bg-sage-400 mb-6"></div>
+                        <h2 className="text-display-sm font-serif text-stone-900 tracking-tight font-bold text-2xl">What our clients say</h2>
                     </div>
 
-                    <div className="min-h-[250px] relative z-20 flex flex-col items-center justify-center w-full">
-                        <AnimatePresence mode="wait">
-                            <m.div
-                                key={current}
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -50 }}
-                                transition={{ type: 'tween', ease: 'easeOut', duration: 0.8 }}
-                                className="flex flex-col items-center w-full"
-                            >
-                                <div className="flex text-amber-500 mb-6 gap-1">
-                                    {Array(mockTestimonials[current].rating).fill(0).map((_, i) => (
-                                        <Star key={i} size={20} fill="currentColor" className="text-amber-500" />
-                                    ))}
-                                </div>
-                                <h3 className="text-heading-lg font-serif italic mb-6 max-w-2xl text-stone-900 leading-relaxed px-4">
-                                    "{mockTestimonials[current].quote}"
-                                </h3>
-                                <div className="text-body-sm text-stone-600">
-                                    <span className="font-bold text-stone-900">{mockTestimonials[current].author}</span> &bull; {mockTestimonials[current].location}
-                                </div>
-                            </m.div>
-                        </AnimatePresence>
-                    </div>
-
-                    <div className="flex justify-center items-center gap-6 mt-12 relative z-20">
+                    <div className="w-full flex items-center justify-center relative min-h-[320px]">
+                        {/* Navigation Left */}
                         <button
-                            onClick={() => setCurrent(prev => (prev - 1 + mockTestimonials.length) % mockTestimonials.length)}
-                            className="w-10 h-10 rounded-full border border-stone-300 hover:bg-white flex items-center justify-center transition-colors cursor-pointer bg-transparent"
+                            onClick={() => handleIndexChange('prev')}
+                            className="absolute left-0 lg:left-8 z-40 w-12 h-12 flex items-center justify-center text-stone-900 hover:text-sage-600 transition-colors bg-surface-warm/50 backdrop-blur-sm rounded-full md:bg-transparent cursor-pointer"
                             aria-label="Previous testimonial"
                         >
-                            <ChevronLeft size={20} className="text-stone-600" />
+                            <ChevronLeft size={32} strokeWidth={1.5} />
                         </button>
-                        <div className="flex gap-2">
-                            {mockTestimonials.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setCurrent(idx)}
-                                    className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${idx === current ? 'bg-sage-600' : 'bg-sage-200'}`}
-                                    aria-label={`Go to slide ${idx + 1}`}
-                                />
-                            ))}
+
+                        <div className="flex items-center justify-center w-full max-w-[1100px] relative h-full">
+                            {slots.map((offset) => {
+                                const index = currentIndex + offset;
+                                const normalizedIndex = ((index % mockTestimonials.length) + mockTestimonials.length) % mockTestimonials.length;
+                                const testimonial = mockTestimonials[normalizedIndex];
+                                const isCenter = offset === 0;
+                                const isVisible = Math.abs(offset) <= 1;
+
+                                return (
+                                    <m.div
+                                        key={index}
+                                        initial={{ x: `${offset * 110}%`, opacity: 0, scale: 0.8 }}
+                                        animate={{
+                                            x: `${offset * 110}%`,
+                                            opacity: isCenter ? 1 : isVisible ? 0.4 : 0,
+                                            scale: isCenter ? 1 : 0.85,
+                                            zIndex: isCenter ? 30 : isVisible ? 10 : 0
+                                        }}
+                                        transition={{ type: 'tween', ease: 'easeInOut', duration: 0.5 }}
+                                        className={cn(
+                                            "absolute top-1/2 -translate-y-1/2 w-[85vw] md:w-[480px] bg-white p-8 md:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex flex-col items-center text-center",
+                                            !isVisible && "pointer-events-none"
+                                        )}
+                                    >
+                                        {/* Stars - visible mainly on center */}
+                                        <m.div
+                                            initial={false}
+                                            animate={{ opacity: isCenter ? 1 : 0, height: isCenter ? 'auto' : 0, marginBottom: isCenter ? 24 : 0 }}
+                                            className="flex text-sage-600 gap-1 overflow-hidden"
+                                        >
+                                            {Array(testimonial.rating).fill(0).map((_, i) => (
+                                                <Star key={`star-${i}`} size={20} fill="currentColor" className="text-sage-600" />
+                                            ))}
+                                        </m.div>
+
+                                        <blockquote className="text-body-md md:text-body-lg text-stone-900 mb-6 md:mb-8 leading-relaxed font-medium relative z-10" aria-live="polite">
+                                            "{testimonial.quote}"
+                                        </blockquote>
+
+                                        <div className="text-caption font-bold text-stone-900 relative z-10 mt-auto">
+                                            {testimonial.author} - <span className="font-normal text-stone-500">{testimonial.location}</span>
+                                        </div>
+
+                                        {/* Floating Quote Mark - Half Inside, Half Outside per mockup */}
+                                        <m.div
+                                            initial={false}
+                                            animate={{ opacity: isCenter ? 1 : 0, scale: isCenter ? 1 : 0.5 }}
+                                            className="absolute bottom-0 right-10 translate-y-[60%] text-[100px] md:text-[140px] leading-[0.5] pt-12 text-sage-600 font-serif z-30 select-none drop-shadow-sm flex items-center justify-center pointer-events-none"
+                                        >
+                                            &rdquo;
+                                        </m.div>
+                                    </m.div>
+                                );
+                            })}
                         </div>
+
+                        {/* Navigation Right */}
                         <button
-                            onClick={() => setCurrent(prev => (prev + 1) % mockTestimonials.length)}
-                            className="w-10 h-10 rounded-full border border-stone-300 hover:bg-white flex items-center justify-center transition-colors cursor-pointer bg-transparent"
+                            onClick={() => handleIndexChange('next')}
+                            className="absolute right-0 lg:right-8 z-40 w-12 h-12 flex items-center justify-center text-stone-900 hover:text-sage-600 transition-colors bg-surface-warm/50 backdrop-blur-sm rounded-full md:bg-transparent cursor-pointer"
                             aria-label="Next testimonial"
                         >
-                            <ChevronRight size={20} className="text-stone-600" />
+                            <ChevronRight size={32} strokeWidth={1.5} />
                         </button>
+                    </div>
+
+                    <div className="flex flex-col items-center mt-8">
+                        <div className="w-[1px] h-8 bg-sage-400"></div>
                     </div>
 
                 </div>

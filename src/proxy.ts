@@ -30,29 +30,13 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
     const { data: { session } } = await supabase.auth.getSession();
 
     // --- 2. Auth Guards ---
-    const protectedRoutes = ['/account', '/seller', '/checkout'];
+    const protectedRoutes = ['/account', '/checkout'];
     const isProtected = protectedRoutes.some((r) => pathname.startsWith(r));
 
     if (isProtected && !session) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);
         return NextResponse.redirect(loginUrl);
-    }
-
-    // Seller dashboard: require seller role
-    if (pathname.startsWith('/seller') && session) {
-        const { data: seller } = await supabase
-            .from('sellers')
-            .select('id, onboarding_completed')
-            .eq('user_id', session.user.id)
-            .single();
-
-        if (!seller) {
-            return NextResponse.redirect(new URL('/seller/onboarding', request.url));
-        }
-        if (!seller.onboarding_completed) {
-            return NextResponse.redirect(new URL('/seller/onboarding', request.url));
-        }
     }
 
     // --- 3. Currency Detection (INTL-001 — PRD §1.5) ---

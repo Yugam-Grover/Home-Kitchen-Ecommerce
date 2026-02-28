@@ -4,10 +4,11 @@ import {
   TestimonialsCarousel,
   ShopTheLook,
   RecentlyViewed,
-  CareGuideModal
+  CareGuideModal,
+  NewArrivals,
+  NewsletterCta
 } from '@/components/external/dynamic-wrappers';
 import { BrandUspBand } from '@/components/wellness-ui/brand-usp-band';
-import { NewsletterCta } from '@/components/wellness-ui/newsletter-cta';
 import { ShopByCategory } from '@/components/wellness-ui/shop-by-category';
 
 export const metadata = {
@@ -23,9 +24,10 @@ export default async function HomePage() {
     <main className="flex flex-col min-h-screen bg-surface-default">
       <HeroSlider />
       <ShopByCategory />
+      <NewArrivals />
+      <ShopTheLook />
       <TrendingProducts />
       <BrandUspBand />
-      <ShopTheLook />
       <TestimonialsCarousel />
       <NewsletterCta />
 

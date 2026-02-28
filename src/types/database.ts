@@ -37,7 +37,6 @@ export interface Database {
             products: {
                 Row: {
                     id: string;
-                    seller_id: string | null;
                     category_id: string;
                     name: string;
                     slug: string;
@@ -46,7 +45,6 @@ export interface Database {
                     base_price_usd: number;
                     gold_price_usd: number | null;
                     pricing_tag: 'standard' | 'clearance' | 'gold_exclusive' | null;
-                    inventory_source: 'warehouse' | 'seller_fulfilled' | 'dropship';
                     visible_to: 'all' | 'gold';
                     visibility_unlock_at: string | null;
                     is_self_sanitizing: boolean;
@@ -67,7 +65,6 @@ export interface Database {
                     name: string;
                     slug: string;
                     base_price_usd: number;
-                    inventory_source: 'warehouse' | 'seller_fulfilled' | 'dropship';
                 };
                 Update: Partial<Database['public']['Tables']['products']['Row']>;
             };
@@ -130,34 +127,6 @@ export interface Database {
                     shipping_address: Json;
                 };
                 Update: Partial<Database['public']['Tables']['orders']['Row']>;
-            };
-            sellers: {
-                Row: {
-                    id: string;
-                    user_id: string;
-                    business_name: string;
-                    business_email: string;
-                    slug: string;
-                    description: string | null;
-                    logo_url: string | null;
-                    fulfillment_method: 'self_ship' | 'dropship';
-                    stripe_connect_account_id: string | null;
-                    stripe_connect_status: 'pending' | 'active' | 'suspended';
-                    commission_rate: number;
-                    on_time_dispatch_rate: number;
-                    is_suspended: boolean;
-                    onboarding_completed: boolean;
-                    created_at: string;
-                    updated_at: string;
-                };
-                Insert: Partial<Database['public']['Tables']['sellers']['Row']> & {
-                    user_id: string;
-                    business_name: string;
-                    business_email: string;
-                    slug: string;
-                    fulfillment_method: 'self_ship' | 'dropship';
-                };
-                Update: Partial<Database['public']['Tables']['sellers']['Row']>;
             };
             memberships: {
                 Row: {

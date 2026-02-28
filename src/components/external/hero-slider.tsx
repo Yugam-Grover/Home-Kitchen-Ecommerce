@@ -5,6 +5,7 @@ import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/wellness-ui/button';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const slides = [
     {
@@ -159,8 +160,13 @@ export function HeroSlider() {
                                 transition={springTransition}
                                 className="w-full h-full relative xl:scale-125"
                             >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={slides[current].image} alt="" className="w-full h-full object-contain pointer-events-auto filter drop-shadow-[0_45px_30px_rgba(28,43,30,0.15)] hover:scale-[1.03] hover:-translate-y-2 transition-transform duration-500" />
+                                <Image
+                                    src={slides[current].image}
+                                    alt={`Featured Product: ${slides[current].productName}`}
+                                    fill
+                                    priority
+                                    className="object-contain pointer-events-auto filter drop-shadow-[0_45px_30px_rgba(28,43,30,0.15)] hover:scale-[1.03] hover:-translate-y-2 transition-transform duration-500"
+                                />
                             </m.div>
                         </AnimatePresence>
                     </div>
@@ -192,8 +198,12 @@ export function HeroSlider() {
                                 className="hidden lg:flex w-48 xl:w-56 aspect-square bg-white/40 rounded-[2rem] p-6 shadow-sm backdrop-blur-md justify-center items-center cursor-pointer hover:bg-white/80 transition-all border border-white relative z-30"
                                 onClick={() => setCurrent(prev => (prev + 1) % slides.length)}
                             >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={slides[(current + 1) % slides.length].image} alt="" className="w-full h-full object-contain filter drop-shadow-lg opacity-90 transition-transform hover:scale-110" />
+                                <Image
+                                    src={slides[(current + 1) % slides.length].image}
+                                    alt={`Upcoming slide: ${slides[(current + 1) % slides.length].productName}`}
+                                    fill
+                                    className="object-contain filter drop-shadow-lg opacity-90 transition-transform hover:scale-110"
+                                />
                             </m.div>
                         </AnimatePresence>
 

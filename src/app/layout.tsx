@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from '@/components/wellness-ui/toaster';
-import { Navbar } from '@/components/wellness-ui/navbar';
+import { Navbar } from '@/components/external/dynamic-wrappers';
 import { Footer } from '@/components/wellness-ui/footer';
 
 export default function RootLayout({
@@ -45,8 +45,14 @@ export default function RootLayout({
       <body
         className="antialiased"
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-stone-900 focus:shadow-xl focus:rounded-full focus:font-medium"
+        >
+          Skip to main content
+        </a>
         <Navbar />
-        <main>
+        <main id="main-content">
           {children}
         </main>
         <Footer />

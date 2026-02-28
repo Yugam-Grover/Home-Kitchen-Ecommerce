@@ -39,10 +39,10 @@ export function ProductCarousel({ title, products, className }: ProductCarouselP
                 ref={scrollRef}
                 className="w-full overflow-x-auto pb-4 hide-scrollbar snap-x snap-mandatory px-4 md:px-0"
             >
-                <div className="container-standard flex gap-6">
+                <div className="container-standard flex gap-6 items-stretch">
                     {products.map((product) => (
-                        <div key={product.id} className="min-w-[280px] md:min-w-[320px] snap-center">
-                            <ProductCard {...product} />
+                        <div key={product.id} className="w-[85vw] sm:w-[45vw] md:w-[30vw] lg:w-[22vw] flex-shrink-0 snap-center flex flex-col h-full">
+                            <ProductCard {...product} className="flex-1 h-full" />
                         </div>
                     ))}
                 </div>

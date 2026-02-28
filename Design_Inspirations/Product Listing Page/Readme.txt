@@ -1,1 +1,1 @@
-I like this structure for product listing page, the left filter panel and overall items listing structure. I also want an additional small search option close to "sort by" which will help the customer to search inside the category as well rather than just navbar global search.
+I like this structure for product listing page, the descriptive filter panel on left side and overall items listing structure. I also want an additional small search option close to "sort by" which will help the customer to search inside the category as well rather than just navbar global search.

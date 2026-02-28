@@ -13,7 +13,7 @@
 | React | `19.2.x` | Server Components, React Compiler (auto-memoization) |
 | Tailwind CSS | `4.0.x` | `@theme` in CSS — NO `tailwind.config.js` |
 | Supabase | `2.49.x` | PostgreSQL, Auth (JWT cookies), Realtime, RLS |
-| Stripe | `17.x` | Payments, Subscriptions, Connect (marketplace) |
+| Stripe | `17.x` | Payments, Subscriptions |
 | Typesense | `2.0.x` | Full-text search, facets, typo tolerance |
 | Cloudinary | URL-based | Product images, 360° sequences, CDN |
 | Resend | `4.x` | Transactional email |
@@ -29,7 +29,6 @@ src/
 ├── app/
 │   ├── (shop)/products/          # PLP + PDP
 │   ├── (account)/                # Profile, orders, saved, membership
-│   ├── (seller)/                 # Seller dashboard, analytics
 │   ├── (checkout)/               # Checkout + confirmation
 │   ├── (auth)/                   # Login, register, forgot-password
 │   ├── membership/               # Pricing page
@@ -70,7 +69,8 @@ src/
 | Page | Route Group | Path | Layout | Cache |
 |---|---|---|---|---|
 | Homepage | root | `/` | Root | 60s |
-| PLP | `(shop)` | `/products`, `/categories/[slug]` | Shop | 30s |
+| Collections/Categories | `(shop)` | `/collections/[...slug]` | Shop | 30s |
+| PLP | `(shop)` | `/products` | Shop | 30s |
 | PDP | `(shop)` | `/products/[slug]` | Shop | 300s (static), Realtime (inventory) |
 | Checkout | `(checkout)` | `/checkout` | Checkout | None |
 | Confirmation | `(checkout)` | `/confirmation` | Checkout | None |
@@ -82,8 +82,6 @@ src/
 | Saved Items | `(account)` | `/account/saved` | Account (sidebar) | None |
 | Membership Mgmt | `(account)` | `/account/membership` | Account (sidebar) | None |
 | Membership Page | root | `/membership` | Root | 60s |
-| Seller Dashboard | `(seller)` | `/seller/dashboard` | Seller | None |
-| Seller Analytics | `(seller)` | `/seller/analytics` | Seller | None |
 
 ---
 
@@ -114,7 +112,7 @@ src/
 | Quantity Stepper | §4.15 | `wellness-ui/quantity-stepper.tsx` | ⬜ Not started |
 | Gold Trial Card | §4.16 | `wellness-ui/gold-trial-card.tsx` | ⬜ Not started |
 | Empty State | §4.17 | `wellness-ui/empty-state.tsx` | ⬜ Not started |
-| Navbar | §2.4 | `wellness-ui/navbar.tsx` | ✅ Complete |
+| Navbar | §2.4 | `external/navbar.tsx` | ✅ Complete |
 | Footer | §2.5 | `wellness-ui/footer.tsx` | ✅ Complete |
 | Breadcrumbs | — | `wellness-ui/breadcrumbs.tsx` | ✅ Complete |
 | Category Search | — | `wellness-ui/category-search.tsx` | ✅ Complete |
@@ -125,7 +123,6 @@ src/
 | Slider | — | `wellness-ui/slider.tsx` | ✅ Complete |
 | Checkout Accordion | §3.4 | `wellness-ui/checkout-accordion.tsx` | ⬜ Not started |
 | Image Viewer 360° | — | `wellness-ui/image-viewer-360.tsx` | ⬜ Not started |
-| Split Shipping Notice | — | `wellness-ui/split-shipping-notice.tsx` | ⬜ Not started |
 
 ---
 
@@ -145,13 +142,16 @@ src/
 | 10 | Two membership tiers only (Free + Gold) | Reduces decision fatigue, clear value prop | `PRD §6.1` |
 | 11 | Explicit `baseUrl: "."` in `tsconfig` | Ensures path aliases `@/*` resolve correctly | `tsconfig.json` |
 | 12 | Next.js Font mapping to `<html>` tag | Ensures global CSS variables resolve correctly for Tailwind `@theme` inheritance. | `architecture` / `layout.tsx` |
+| 13 | Mega Menu Dropdowns | 3-column Framer Motion mega menu for 'Shop' to provide instant category access without layout shifts. | `navbar.tsx` |
+| 14 | Seamless Layout Animations | `AnimatePresence mode="popLayout"` for fluid layout shifts without visual ghosting or rigid opacity changes. | `testimonials-carousel.tsx` |
+| 15 | Bespoke Abstract SVGs | Hand-coded responsive scalable vector illustrations (Japandi style) instead of raster images for speed and crispness. | `newsletter-cta.tsx` |
 
 ---
 
 ## Current Project Status
 
-**Phase:** 2 — Design System & Components ✅ COMPLETE
-**Next Phase:** 3 — Page Construction (Homepage -> PLP -> PDP)
+**Phase:** 4 — Page Construction (PLP ✅, PDP ⬜, Checkout ⬜)
+**Next Phase:** 5 — Cart & Checkout Integration
 
 ### What's been set up:
 - `.agent/rules/project-rules.md` — 10 sections: context protocol, no-improvisation + gap detection, version locks, directory structure, naming, tokens, brand, assets, perf budgets, env vars

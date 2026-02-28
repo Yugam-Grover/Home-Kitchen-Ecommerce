@@ -106,9 +106,8 @@ src/
 ├── app/                          # Next.js 16 App Router
 │   ├── (shop)/                   # Public shopping routes
 │   │   ├── products/             # PLP + PDP
-│   │   └── categories/           # Category pages
+│   │   └── collections/          # Dynamic Collection/Category Pages
 │   ├── (account)/                # Authenticated user routes
-│   ├── (seller)/                 # Seller dashboard routes
 │   ├── (checkout)/               # Checkout + confirmation
 │   ├── (auth)/                   # Login, register, forgot-password
 │   ├── membership/               # Pricing page (public)
@@ -272,3 +271,31 @@ NODE_ENV
 ```
 
 Variables prefixed with `NEXT_PUBLIC_` are client-safe. All others are server-only — NEVER expose them to the client.
+
+---
+
+## 11. Image & Carousel Architecture Rules
+
+> Source: `design-system.md §6.2` & `§4`
+
+1. **Aspect Ratio Consistency:** ALL product-related images MUST strictly use a 4:5 portrait ratio (e.g., `<div className="aspect-[4/5] relative">`). This ensures grid alignment uniformity preventing UI jumps.
+2. **Strict Lazy vs. Eager Loading:**
+    - Any image situated **below the fold** MUST have `loading="lazy"`.
+    - Any image situated **above the fold** (Hero blocks, PLP topmost row, PDP featured image) MUST explicitly include `priority={true}` in Next.js `<Image />` to ensure `fetchpriority="high"`.
+3. **Mobile-First Crop (POI Strategy):** You CANNOT just scale down 16:9 desktop lifestyle shots into mobile 4:5 frames using blind `object-cover`. You MUST serve a distinct, vertically cropped image focused tightly on the "Point of Interest" (the product).
+4. **Art Direction (`<picture>` tag):** To achieve Rule 3, Above-the-fold banners and editorial blocks MUST use the `<picture>` tag (or equivalent explicit art-direction components) connecting distinct `<source media="(max-width: 768px)" srcset="..." />` files for mobile vs desktop.
+5. **Preventing CLS:** ALL images MUST be enveloped in a container possessing either an explicit `aspect-[...]` class or strict dimensions to reserve the DOM space before the image resolves.
+6. **Carousel Constraints:** Product/Testimonial carousels MUST use native CSS `scroll-snap-type: x mandatory` with `scroll-behavior: smooth`. They MUST display a partial "peek" (roughly 15-20% of the next card natively computed via `w-[85vw]` or similar) to signify momentum. ALL cards in a single carousel MUST maintain identical heights via container constraints to stabilize horizontal layout lines.
+
+---
+
+## 12. Future CMS Admin Dashboard Compatibility
+
+> Source: `architecture.md §12` (Future Expansion)
+
+A Headless CMS (e.g., Sanity, Strapi, or Supabase custom admin) will be integrated in a future phase to manage home page curation, editorial content, and dynamic banners. To ensure zero refactoring overhead when this happens:
+
+1. **Content Abstraction:** Hardcode minimal text in structural components. Where text like "Our Story" or dynamic promotional banners are utilized, establish them via localized variables or abstracted configuration files that can be easily swapped for an API fetch later.
+2. **Component Pluggability:** Sections like the `HeroSlider` or `TrendingProducts` should accept structured data props (`images[]`, `headlines`, `ctas`). Do NOT bury content strings deep inside the JSX loops.
+3. **Database Extensibility:** When creating Supabase tables for anything editorial (like a dynamic promo banner), prefix them with `cms_` or `content_` to isolate them from transactional data (`orders`, `users`).
+4. **Draft Previews:** Any data-fetching mechanism designed for future editorial content MUST account for a potential "draft" mode bypass. Use `is_published: boolean` flags on any content-oriented Supabase schema moving forward.

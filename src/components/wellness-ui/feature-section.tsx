@@ -12,6 +12,7 @@ export interface FeatureSectionProps {
     ctaText?: string;
     ctaHref?: string;
     className?: string;
+    priority?: boolean;
 }
 
 export function FeatureSection({
@@ -23,6 +24,7 @@ export function FeatureSection({
     ctaText,
     ctaHref,
     className,
+    priority = false,
 }: FeatureSectionProps) {
     return (
         <section className={cn('py-16 md:py-24 bg-white', className)}>
@@ -39,6 +41,7 @@ export function FeatureSection({
                             src={imageSrc}
                             alt={imageAlt}
                             fill
+                            priority={priority}
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, 50vw"
                         />

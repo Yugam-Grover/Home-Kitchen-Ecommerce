@@ -71,7 +71,7 @@ Next.js 16 uses `proxy.ts` (not `middleware.ts`) for edge logic. This file handl
 - Security headers (HSTS, CSP, X-Frame-Options)
 - CSRF token validation
 - Rate limiting routing
-- Protected route redirects (`/account/*`, `/seller/*`, `/checkout`)
+- Protected route redirects (`/account/*`, `/checkout`)
 - Membership tier header (`x-membership-tier`)
 
 **NEVER create a `middleware.ts` file. All edge logic goes in `proxy.ts`.**
@@ -124,12 +124,13 @@ The compiler optimizes re-renders automatically. Manual memoization adds unneces
 
 > Source: `architecture.md §6`
 
-Three client variants — use the correct one for each context:
+Four client variants — use the correct one for each context:
 
 | Client | Function | Context | RLS |
 |---|---|---|---|
 | Browser | `createBrowserSupabase()` | Client components | ✅ Enforced |
 | Server | `createServerSupabase()` | Server components, Route Handlers | ✅ Enforced |
+| Anon | `createAnonSupabase()` | **Server components inside `'use cache'` ONLY** | ✅ Enforced (Public Read Only) |
 | Admin | `createAdminSupabase()` | Server-only admin ops (erasure, migrations) | ❌ Bypassed |
 
 ```tsx
@@ -141,6 +142,10 @@ const supabase = createBrowserSupabase();
 // Server component or Route Handler
 import { createServerSupabase } from '@/lib/supabase/server';
 const supabase = await createServerSupabase();
+
+// Cached server component (bypasses cookies() reading)
+import { createAnonSupabase } from '@/lib/supabase/server';
+const supabase = createAnonSupabase();
 
 // Admin operations ONLY (service role)
 import { createAdminSupabase } from '@/lib/supabase/admin';
@@ -280,12 +285,13 @@ Return structured error responses with appropriate HTTP status codes:
 
 - Framer Motion / GSAP → ONLY in `components/external/`
 - Must use `dynamic(() => import(...), { ssr: false })`
+- **LazyMount Mandate:** ALL heavy components (carousels, heavy animated blocks) located *Below The Fold* MUST be wrapped in `<LazyMount fallback={<Skeleton />}>` to defer hydration and protect main-thread initialization.
 - CSS transitions for simple hover/focus — no JS library needed
 - `@media (prefers-reduced-motion: reduce)` must disable all non-essential animations
 
 ### Above-Fold Rule
 
-Components rendered above the fold (hero, navbar, first product row) must NEVER synchronously import animation libraries. This is a **performance-blocking violation** (degrades LCP).
+Framer Motion and GSAP are **permitted** for components rendered above the fold (e.g., hero, navbar, first product row). You should still strive to protect the Largest Contentful Paint (LCP) by wrapping them in dynamic imports and providing static Server-Side Rendered (SSR) fallbacks/skeletons, but there is no strict prohibition.
 
-**🚨 CRITICAL WARNING FOR PHASE 3 (HOMEPAGE HERO):**
-The Homepage Hero Slider must **NOT** use Framer Motion, GSAP, or any other JS animation library. It must be engineered using *pure CSS transitions and animations* tied to Tailwind v4 `@theme` variables (e.g., `var(--motion-slow)`). Using Framer Motion here will ruin the Largest Contentful Paint (LCP) metric. Reserve Framer Motion via `next/dynamic` exclusively for components further down the page like the Trending Products carousel or Testimonials.
+**🚨 REVISED RULING FOR PHASE 3 (HOMEPAGE HERO):**
+The Homepage Hero Slider uses Framer Motion via `next/dynamic` exclusively. Skeletons compensate for the LCP delay. Feel free to use Framer Motion features across essential structural components (like Mega Menus) to enhance the Japandi aesthetic perfectly.

@@ -38,7 +38,12 @@ export function ShopTheLook() {
                                 onMouseEnter={() => setActiveHotspot(spot.id)}
                                 onMouseLeave={() => setActiveHotspot(null)}
                             >
-                                <button className="w-8 h-8 rounded-full bg-white shadow-md flex justify-center items-center text-stone-900 hover:scale-110 transition-transform relative cursor-pointer">
+                                <button
+                                    className="w-8 h-8 rounded-full bg-white shadow-md flex justify-center items-center text-stone-900 hover:scale-110 transition-transform relative cursor-pointer"
+                                    aria-label={`View details for ${spot.name}`}
+                                    onFocus={() => setActiveHotspot(spot.id)}
+                                    onBlur={() => setActiveHotspot(null)}
+                                >
                                     <Plus size={16} />
                                     <span className="absolute inset-0 rounded-full animate-ping opacity-25 bg-white"></span>
                                 </button>

@@ -90,52 +90,9 @@
 }
 ```
 
-#### Tailwind Extension
+#### Tailwind 4 Token Integration
 
-```js
-// tailwind.config.js — colors
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        sage: {
-          50: '#F0F4F1',
-          100: '#D9E3DA',
-          200: '#B3C7B7',
-          300: '#8DAB93',
-          400: '#6B7F6F',
-          500: '#4A5D4E',
-          600: '#3D4E41',
-          700: '#33422F',
-          800: '#263121',
-          900: '#1C2B1E',
-        },
-        amber: {
-          50: '#FFFBEB',
-          100: '#FEF3C7',
-          300: '#FCD34D',
-          500: '#D97706',
-          600: '#B45309',
-          700: '#92400E',
-        },
-        cloud: '#F2F0EA',
-        stone: {
-          50: '#FAFAF9',
-          100: '#F5F5F4',
-          200: '#E7E5E4',
-          300: '#D6D3D1',
-          400: '#A8A29E',
-          500: '#78716C',
-          600: '#57534E',
-          700: '#44403C',
-          800: '#292524',
-          900: '#1C1917',
-        },
-      },
-    },
-  },
-};
-```
+All colors are natively enforced using Tailwind 4 `@theme` mappings located exclusively in `src/styles/globals.css`. **Never use a `tailwind.config.js` file.**
 
 ### 1.2 Typography
 
@@ -172,22 +129,9 @@ module.exports = {
 | `price-md` | Price display (Card) | Satoshi | 18px / 1.125rem | 700 | 1.2 | 0 | `text-lg font-bold` |
 | `price-strike` | Original/struck price | Satoshi | 16px / 1rem | 400 | 1.2 | 0 | `text-base line-through text-stone-400` |
 
-#### Tailwind Extension
+#### Tailwind 4 Configuration
 
-```js
-// tailwind.config.js — typography
-module.exports = {
-  theme: {
-    extend: {
-      fontFamily: {
-        serif: ['Lora', 'Georgia', 'Times New Roman', 'serif'],
-        sans: ['Satoshi', 'Geist', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['Geist Mono', 'SF Mono', 'Fira Code', 'monospace'],
-      },
-    },
-  },
-};
-```
+No `tailwind.config.js` is permitted. All fonts and custom text classes must be orchestrated exclusively via `@theme` token variables in `globals.css` per the PRD directives.
 
 ### 1.3 Spacing
 
@@ -1424,6 +1368,17 @@ Used on: PLP grid, Homepage Trending carousel, Related Products, Recommended Pro
 | UGC thumbnails | WebP | `9:16` (portrait) | 200px | Lazy |
 
 > **PRD Ref:** PDP-005 through PDP-008 — 360° viewer uses 24–36 frame sequences, lazy-loaded after first 6 frames.
+
+### 6.3 Strict Image & Layout Rules
+
+1. **Aspect Ratio Consistency:** ALL product-related images MUST strictly use a 4:5 portrait ratio (e.g., `<div className="aspect-[4/5] relative">`). This ensures grid alignment uniformity preventing UI jumps.
+2. **Strict Lazy vs. Eager Loading:**
+    - Any image situated **below the fold** MUST have `loading="lazy"`.
+    - Any image situated **above the fold** (Hero blocks, PLP topmost row, PDP featured image) MUST explicitly include `priority={true}` in Next.js `<Image />` to ensure `fetchpriority="high"`.
+3. **Mobile-First Crop (POI Strategy):** You CANNOT just scale down 16:9 desktop lifestyle shots into mobile 4:5 frames using blind `object-cover`. You MUST serve a distinct, vertically cropped image focused tightly on the "Point of Interest" (the product).
+4. **Art Direction (`<picture>` tag):** To achieve the POI rule, Above-the-fold banners and editorial blocks MUST use the `<picture>` tag (or equivalent explicit art-direction components) connecting distinct `<source media="(max-width: 768px)" srcset="..." />` files for mobile vs desktop.
+5. **Preventing CLS:** ALL images MUST be enveloped in a container possessing either an explicit `aspect-[...]` class or strict dimensions to reserve the DOM space before the image resolves.
+6. **Carousel Constraints:** Product/Testimonial carousels MUST use native CSS `scroll-snap-type: x mandatory` with `scroll-behavior: smooth`. They MUST display a partial "peek" (roughly 15-20% of the next card natively computed via `w-[85vw]` or similar) to signify momentum. ALL cards in a single carousel MUST maintain identical heights via container constraints to stabilize horizontal layout lines.
 
 ---
 

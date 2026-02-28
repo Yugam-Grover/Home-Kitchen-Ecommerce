@@ -22,25 +22,7 @@ CREATE TABLE public.users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. SELLERS
-CREATE TABLE public.sellers (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
-  business_name TEXT NOT NULL,
-  business_email TEXT UNIQUE NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  description TEXT,
-  logo_url TEXT,
-  fulfillment_method TEXT CHECK (fulfillment_method IN ('self_ship', 'dropship')) DEFAULT 'self_ship',
-  stripe_connect_account_id TEXT UNIQUE,
-  stripe_connect_status TEXT CHECK (stripe_connect_status IN ('pending', 'active', 'suspended')) DEFAULT 'pending',
-  commission_rate DECIMAL(5, 2) DEFAULT 10.00,
-  on_time_dispatch_rate DECIMAL(5, 2) DEFAULT 100.00,
-  is_suspended BOOLEAN DEFAULT FALSE,
-  onboarding_completed BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- 2. (REMOVED) SELLERS table — DTC simplification: platform is sole vendor
 
 -- 3. CATEGORIES (Inferred)
 CREATE TABLE public.categories (
@@ -55,28 +37,33 @@ CREATE TABLE public.categories (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. PRODUCTS
+-- 4. PRODUCTS (DTC: no seller_id, no inventory_source)
 CREATE TABLE public.products (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  seller_id UUID REFERENCES public.sellers(id),
+  sku TEXT UNIQUE,
   category_id UUID REFERENCES public.categories(id),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
   short_description TEXT,
   base_price_usd DECIMAL(10, 2) NOT NULL,
+  compare_at_price_usd DECIMAL(10, 2),
   gold_price_usd DECIMAL(10, 2),
   pricing_tag TEXT CHECK (pricing_tag IN ('standard', 'clearance', 'gold_exclusive')),
-  inventory_source TEXT CHECK (inventory_source IN ('warehouse', 'seller_fulfilled', 'dropship')),
   visible_to TEXT CHECK (visible_to IN ('all', 'gold')) DEFAULT 'all',
   visibility_unlock_at TIMESTAMPTZ,
   is_self_sanitizing BOOLEAN DEFAULT FALSE,
   is_modular BOOLEAN DEFAULT FALSE,
   certifications TEXT[],
   material TEXT,
+  material_details JSONB,
   dimensions JSONB,
   weight_grams INTEGER,
   features JSONB,
+  usp_badges JSONB,
+  narrative_blocks JSONB,
+  faq_data JSONB,
+  related_product_skus TEXT[],
   status TEXT CHECK (status IN ('draft', 'active', 'archived')) DEFAULT 'draft',
   rating_avg DECIMAL(3, 2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
@@ -101,13 +88,13 @@ CREATE TABLE public.product_variants (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. ORDERS
+-- 6. ORDERS (DTC: removed 'partially_shipped' status)
 CREATE TABLE public.orders (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id),
   guest_email TEXT,
   order_number TEXT UNIQUE NOT NULL,
-  status TEXT CHECK (status IN ('pending', 'confirmed', 'partially_shipped', 'shipped', 'delivered', 'canceled', 'return_initiated')) DEFAULT 'pending',
+  status TEXT CHECK (status IN ('pending', 'confirmed', 'shipped', 'delivered', 'canceled', 'return_initiated')) DEFAULT 'pending',
   currency TEXT NOT NULL,
   exchange_rate DECIMAL(10, 6) NOT NULL,
   subtotal DECIMAL(10, 2) NOT NULL,
@@ -127,11 +114,10 @@ CREATE TABLE public.orders (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 7. ORDER ITEMS
+-- 7. ORDER ITEMS (DTC: no seller_id)
 CREATE TABLE public.order_items (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
-  seller_id UUID REFERENCES public.sellers(id),
   product_id UUID REFERENCES public.products(id),
   variant_id UUID REFERENCES public.product_variants(id),
   quantity INTEGER NOT NULL,
@@ -202,7 +188,6 @@ CREATE TABLE public.addresses (
 
 -- RLS POLICIES
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.sellers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.product_variants ENABLE ROW LEVEL SECURITY;
@@ -217,9 +202,8 @@ ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own data" ON public.users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own data" ON public.users FOR UPDATE USING (auth.uid() = id);
 
--- products: public read active, sellers read own
+-- products: public read active (DTC: no seller policy needed)
 CREATE POLICY "Public read active products" ON public.products FOR SELECT USING (status = 'active');
-CREATE POLICY "Sellers read own products" ON public.products FOR SELECT USING (seller_id IN (SELECT id FROM sellers WHERE user_id = auth.uid()));
 
 -- categories: public read
 CREATE POLICY "Public read categories" ON public.categories FOR SELECT USING (true);

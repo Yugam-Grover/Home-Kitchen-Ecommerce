@@ -13,20 +13,17 @@ export type MembershipAction =
     | 'downgraded'
     | 'payment_failed';
 
-// === Fulfillment ===
-export type FulfillmentSource = 'warehouse' | 'seller_fulfilled' | 'dropship';
-
 // === Orders ===
+
 export type OrderStatus =
     | 'pending'
     | 'confirmed'
-    | 'partially_shipped'
     | 'shipped'
     | 'delivered'
     | 'canceled'
     | 'return_initiated';
 
-export type SubOrderStatus =
+export type OrderItemStatus =
     | 'processing'
     | 'dispatched'
     | 'in_transit'
@@ -39,7 +36,6 @@ export type SubOrderStatus =
 export type ProductStatus = 'draft' | 'active' | 'archived';
 export type PricingTag = 'standard' | 'clearance' | 'gold_exclusive';
 export type ProductVisibility = 'all' | 'gold';
-export type InventorySource = 'warehouse' | 'seller_fulfilled' | 'dropship';
 
 // === Inventory ===
 export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
@@ -56,8 +52,6 @@ export interface CartItem {
     variantId: string;
     quantity: number;
     addedAt: number;
-    fulfillmentSource: FulfillmentSource;
-    sellerId: string | null;
 }
 
 // === Currency ===
@@ -73,20 +67,7 @@ export interface ExchangeRates {
     fetchedAt: number;
 }
 
-// === Seller ===
-export type SellerFulfillmentMethod = 'self_ship' | 'dropship';
-export type StripeConnectStatus = 'pending' | 'active' | 'suspended';
 
-// === Stripe Connect ===
-export interface FulfillmentGroup {
-    source: FulfillmentSource;
-    sellerId: string | null;
-    items: CartItem[];
-    dispatchSlaHours: number;
-    shippingCost: number;
-    estimatedDeliveryMin: Date;
-    estimatedDeliveryMax: Date;
-}
 
 // === Promo Codes ===
 export type PromoCodeType = 'percentage' | 'fixed_amount' | 'free_shipping';

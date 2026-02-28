@@ -56,8 +56,9 @@
 
 | Pattern | Usage | Rule |
 |---|---|---|
-| `proxy.ts` | Routing, auth guards, split-shipping logic, Stripe session | Stable Node.js runtime. All middleware-like logic lives here. **No `middleware.ts`**. |
+| `proxy.ts` | Routing, auth guards, currency detection, security headers | Stable Node.js runtime. All middleware-like logic lives here. **No `middleware.ts`**. |
 | `use cache` | Explicit caching control | Replaces legacy `fetch`-level caching. Applied per-component or per-function. |
+| `LazyMount` | Client JS execution deferral | `src/components/external/lazy-mount.tsx`. MUST wrap all heavy interactive client components situated Below The Fold (e.g. carousels). |
 | React Server Components | Default for all components | Client components only when interactivity required (`"use client"` directive). |
 | React Compiler | Automatic memoization | No manual `useMemo`/`useCallback` unless profiler proves necessity. |
 | `layout.tsx` | Shared UI shells | Navbar, Footer, providers. Nested per route group. |
@@ -71,7 +72,7 @@
 
 ```
 src/
-├── proxy.ts                          # Stable Node.js runtime — routing, auth guards, split-ship logic
+├── proxy.ts                          # Stable Node.js runtime — routing, auth guards, currency detection
 ├── app/
 │   ├── layout.tsx                    # Root layout: Navbar + Footer + Providers
 │   ├── page.tsx                      # Homepage (§3.1 design-system)
@@ -82,9 +83,9 @@ src/
 │   │   │   ├── page.tsx              # PLP — Product Listing Page (§3.2 design-system)
 │   │   │   └── [slug]/
 │   │   │       └── page.tsx          # PDP — Product Detail Page (§3.3 design-system)
-│   │   ├── categories/
-│   │   │   └── [category]/
-│   │   │       └── page.tsx          # Category-filtered PLP
+│   │   ├── collections/
+│   │   │   └── [...slug]/
+│   │   │       └── page.tsx          # Dynamic Collection/Category Pages (Catch-all)
 │   │   └── search/
 │   │       └── page.tsx              # Search results page (DISC-005→013)
 │   ├── (checkout)/
@@ -106,13 +107,6 @@ src/
 │   │   ├── returns/page.tsx          # Returns & Refunds (§3.6)
 │   │   ├── help/page.tsx             # Help & Support (§3.6)
 │   │   └── settings/page.tsx
-│   ├── (seller)/
-│   │   ├── layout.tsx                # Seller dashboard shell (max 5 nav items — PRD §2.4)
-│   │   ├── dashboard/page.tsx
-│   │   ├── products/page.tsx         # Listing management + CSV bulk upload
-│   │   ├── orders/page.tsx           # Seller order management
-│   │   ├── analytics/page.tsx        # Impressions, CTR, conversion (PRD §2.4 Growth)
-│   │   └── earnings/page.tsx         # Commission breakdown, payout schedule
 │   ├── (auth)/
 │   │   ├── login/page.tsx
 │   │   ├── register/page.tsx
@@ -136,8 +130,7 @@ src/
 │       │   ├── erasure/route.ts      # GDPR right-to-erasure (PRD §5.4)
 │       │   └── export/route.ts       # GDPR data export (PRD §5.4)
 │       ├── webhooks/
-│       │   ├── stripe/route.ts       # Stripe webhook handler
-│       │   └── inventory/route.ts    # Dropship partner inventory webhooks
+│       │   └── stripe/route.ts       # Stripe webhook handler
 │       └── exchange-rates/route.ts   # Currency rate refresh (INTL-003)
 ├── components/
 │   ├── wellness-ui/                  # shadcn/ui + custom components per design-system.md
@@ -163,7 +156,6 @@ src/
 │   │   ├── checkout-accordion.tsx    # §3.4 — Checkout step accordion
 │   │   ├── image-viewer-360.tsx      # PDP-005→008 — 360° product viewer
 │   │   ├── membership-card.tsx       # §3.5 — Pricing tier cards
-│   │   ├── split-shipping-notice.tsx # §3.4 — Split-shipping disclosure
 │   │   └── membership-banner.tsx     # §3.4 — Checkout upgrade banner
 │   ├── external/                     # Third-party animations (Framer Motion, GSAP)
 │   │   ├── .eslintrc.json            # Isolated lint rules — LCP guard (< 1.2s)
@@ -182,15 +174,13 @@ src/
 │   │   ├── types.ts                  # Generated TypeScript types from Supabase schema
 │   │   └── queries/
 │   │       ├── products.ts           # Product CRUD + variant matrix queries
-│   │       ├── orders.ts             # Order + sub-order lifecycle
+│   │       ├── orders.ts             # Order lifecycle
 │   │       ├── inventory.ts          # Stock check, decrement (optimistic lock)
 │   │       ├── memberships.ts        # Tier management, trial, upgrade/downgrade
-│   │       ├── sellers.ts            # Seller onboarding, commission, payout
 │   │       └── privacy.ts            # GDPR erasure, export, CCPA opt-out
 │   ├── stripe/
 │   │   ├── client.ts                 # Stripe SDK initialization
 │   │   ├── checkout.ts               # PaymentIntent lifecycle (CHK-001→005)
-│   │   ├── connect.ts                # Stripe Connect — seller payouts (MKT-003)
 │   │   ├── subscriptions.ts          # Gold membership billing (GOLD-001→008)
 │   │   └── webhooks.ts               # Webhook signature verification + handlers
 │   ├── typesense/
@@ -200,7 +190,7 @@ src/
 │   ├── cloudinary/
 │   │   ├── config.ts                 # Upload preset with f_auto,q_auto enforcement
 │   │   ├── transform.ts             # URL builder with responsive breakpoints
-│   │   └── upload.ts                 # Server-side upload for seller product images
+│   │   └── upload.ts                 # Server-side upload for product images
 │   ├── currency/
 │   │   ├── rates.ts                  # Exchange rate fetcher (15-min refresh — INTL-003)
 │   │   ├── format.ts                 # Intl.NumberFormat wrappers (INTL-006)
@@ -208,10 +198,6 @@ src/
 │   ├── membership/
 │   │   ├── tier-engine.ts            # Tier benefit resolution
 │   │   └── discount-stacking.ts      # STK-001→007 stacking rules engine
-│   ├── fulfillment/
-│   │   ├── router.ts                 # Fulfillment source routing (INV-001→004)
-│   │   ├── split-order.ts            # Parent + N child sub-order creation (INV-003)
-│   │   └── sla-monitor.ts            # Dropship SLA timer + escalation (INV-005→008)
 │   ├── email/
 │   │   └── resend.ts                 # Transactional email triggers (Resend SDK)
 │   └── utils/
@@ -242,10 +228,8 @@ public/
 ### 2.3 Route Map
 | Route | Access | Purpose |
 |---|---|---|
-| `(account)/my-orders` | Auth | User order history (was /orders) |
-| `(account)/my-membership` | Auth | Membership mgmt (was /membership) |
-| `(seller)/seller-orders` | Seller | Seller order fulfillment (was /orders) |
-| `(seller)/seller-products` | Seller | Listing management (was /products) |
+| `(account)/my-orders` | Auth | User order history |
+| `(account)/my-membership` | Auth | Membership management |
 
 
 > [!IMPORTANT]
@@ -269,18 +253,13 @@ erDiagram
     products ||--o{ product_variants : has
     products ||--o{ product_images : has
     products ||--o{ product_certifications : has
-    products }o--|| sellers : "listed_by (marketplace)"
     products }o--|| categories : belongs_to
 
     product_variants ||--o{ line_items : "ordered as"
     product_variants ||--o{ inventory_log : tracks
 
-    orders ||--|{ sub_orders : splits_into
-    sub_orders ||--|{ line_items : contains
-    sub_orders ||--o| shipments : "fulfilled by"
-
-    sellers ||--o| stripe_connect_accounts : has
-    sellers ||--o{ seller_analytics : generates
+    orders ||--|{ line_items : contains
+    orders ||--o| shipments : "fulfilled by"
 
     memberships ||--o{ membership_history : logs
 
@@ -416,7 +395,6 @@ CREATE TABLE reviews (
 ```sql
 CREATE TABLE products (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  seller_id       UUID REFERENCES sellers(id),          -- NULL = DTC (platform-owned)
   category_id     UUID NOT NULL REFERENCES categories(id),
   name            TEXT NOT NULL,
   slug            TEXT UNIQUE NOT NULL,
@@ -425,7 +403,6 @@ CREATE TABLE products (
   base_price_usd  NUMERIC(10,2) NOT NULL CHECK (base_price_usd >= 0),
   gold_price_usd  NUMERIC(10,2),                        -- GOLD-008: Exclusive pricing
   pricing_tag     TEXT CHECK (pricing_tag IN ('standard', 'clearance', 'gold_exclusive')),
-  inventory_source TEXT NOT NULL CHECK (inventory_source IN ('warehouse', 'seller_fulfilled', 'dropship')),
   visible_to      TEXT NOT NULL DEFAULT 'all' CHECK (visible_to IN ('all', 'gold')),  -- GOLD-007: Early access gating
   visibility_unlock_at TIMESTAMPTZ,                     -- Auto-unlock after 48h
   is_self_sanitizing BOOLEAN NOT NULL DEFAULT FALSE,    -- USP metadata
@@ -446,8 +423,6 @@ CREATE TABLE products (
 CREATE INDEX idx_products_status ON products(status) WHERE status = 'active';
 -- Category page queries
 CREATE INDEX idx_products_category ON products(category_id, status);
--- Seller dashboard queries
-CREATE INDEX idx_products_seller ON products(seller_id) WHERE seller_id IS NOT NULL;
 -- Early access visibility (GOLD-007)
 CREATE INDEX idx_products_visibility ON products(visible_to, visibility_unlock_at);
 ```
@@ -479,17 +454,16 @@ CREATE INDEX idx_variants_product_stock ON product_variants(product_id, stock);
 CREATE INDEX idx_variants_sku ON product_variants(sku);
 ```
 
-#### `orders` & `sub_orders`
+#### `orders`
 
 ```sql
--- Parent order: single payment, single customer
 CREATE TABLE orders (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID REFERENCES users(id),            -- NULL = guest checkout
   guest_email     TEXT,                                  -- Guest checkout email
   order_number    TEXT UNIQUE NOT NULL,                  -- Human-readable: ORD-XXXXXX
   status          TEXT NOT NULL DEFAULT 'pending' CHECK (status IN (
-    'pending', 'confirmed', 'partially_shipped', 'shipped', 'delivered', 'canceled', 'return_initiated'
+    'pending', 'confirmed', 'shipped', 'delivered', 'canceled', 'return_initiated'
   )),
   currency        TEXT NOT NULL,                         -- User's checkout currency (INTL-004)
   exchange_rate   NUMERIC(12,6) NOT NULL,                -- Locked rate at checkout
@@ -506,36 +480,15 @@ CREATE TABLE orders (
   billing_address  JSONB,
   ip_address      INET,
   user_agent      TEXT,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Sub-order: one per fulfillment source (INV-003)
-CREATE TABLE sub_orders (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id        UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  fulfillment_source TEXT NOT NULL CHECK (fulfillment_source IN ('warehouse', 'seller_fulfilled', 'dropship')),
-  seller_id       UUID REFERENCES sellers(id),
-  status          TEXT NOT NULL DEFAULT 'processing' CHECK (status IN (
-    'processing', 'dispatched', 'in_transit', 'delivered', 'canceled', 'return_initiated', 'returned'
-  )),
-  dispatch_deadline TIMESTAMPTZ,                        -- INV-005: 24h warehouse / 48h dropship SLA
-  dispatched_at   TIMESTAMPTZ,
+  is_priority     BOOLEAN NOT NULL DEFAULT FALSE,       -- GOLD-003: Priority delivery flagging
   tracking_number TEXT,
   carrier         TEXT,
   estimated_delivery_min DATE,
   estimated_delivery_max DATE,
-  shipping_cost   NUMERIC(10,2) NOT NULL DEFAULT 0,
-  is_priority     BOOLEAN NOT NULL DEFAULT FALSE,       -- GOLD-003: Priority delivery flagging
-  sla_escalation_count INT NOT NULL DEFAULT 0,
+  dispatched_at   TIMESTAMPTZ,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
-CREATE INDEX idx_suborders_order ON sub_orders(order_id);
-CREATE INDEX idx_suborders_seller ON sub_orders(seller_id) WHERE seller_id IS NOT NULL;
-CREATE INDEX idx_suborders_sla ON sub_orders(fulfillment_source, status, dispatch_deadline)
-  WHERE status = 'processing';
 ```
 
 #### `line_items`
@@ -543,7 +496,7 @@ CREATE INDEX idx_suborders_sla ON sub_orders(fulfillment_source, status, dispatc
 ```sql
 CREATE TABLE line_items (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sub_order_id    UUID NOT NULL REFERENCES sub_orders(id) ON DELETE CASCADE,
+  order_id        UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   product_id      UUID NOT NULL REFERENCES products(id),
   variant_id      UUID NOT NULL REFERENCES product_variants(id),
   quantity        INT NOT NULL CHECK (quantity > 0),
@@ -555,32 +508,6 @@ CREATE TABLE line_items (
 );
 ```
 
-#### `sellers`
-
-```sql
-CREATE TABLE sellers (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  business_name   TEXT NOT NULL,
-  business_email  TEXT NOT NULL,
-  slug            TEXT UNIQUE NOT NULL,
-  description     TEXT,
-  logo_url        TEXT,
-  fulfillment_method TEXT NOT NULL CHECK (fulfillment_method IN ('self_ship', 'dropship')),
-  stripe_connect_account_id TEXT UNIQUE,
-  stripe_connect_status TEXT NOT NULL DEFAULT 'pending' CHECK (stripe_connect_status IN ('pending', 'active', 'suspended')),
-  commission_rate NUMERIC(4,2) NOT NULL DEFAULT 5.00,    -- Flat 5% — MKT-001
-  on_time_dispatch_rate NUMERIC(5,2) DEFAULT 100.00,     -- INV-008: Rolling 30-day rate
-  is_suspended    BOOLEAN NOT NULL DEFAULT FALSE,        -- INV-008: Auto-suspend below 85%
-  onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(user_id)
-);
-
-CREATE INDEX idx_sellers_dispatch_rate ON sellers(on_time_dispatch_rate) WHERE is_suspended = FALSE;
-```
-
 ### 3.3 Row Level Security (RLS)
 
 > [!IMPORTANT]
@@ -590,13 +517,11 @@ CREATE INDEX idx_sellers_dispatch_rate ON sellers(on_time_dispatch_rate) WHERE i
 -- Enable RLS on all user-facing tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sub_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE line_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE memberships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE addresses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
 
 -- USERS: Read own profile, update own profile
 CREATE POLICY users_select_own ON users FOR SELECT USING (auth.uid() = id);
@@ -606,26 +531,8 @@ CREATE POLICY users_update_own ON users FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY orders_select_own ON orders FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY orders_insert_own ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- SUB_ORDERS: Via parent order ownership
-CREATE POLICY suborders_select ON sub_orders FOR SELECT USING (
-  EXISTS (SELECT 1 FROM orders WHERE orders.id = sub_orders.order_id AND orders.user_id = auth.uid())
-);
-
--- SELLERS: Read own seller profile; public read for storefront
-CREATE POLICY sellers_select_own ON sellers FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY sellers_update_own ON sellers FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY sellers_public_read ON sellers FOR SELECT USING (onboarding_completed = TRUE);
-
--- SELLER ORDER ACCESS: Sellers see sub-orders assigned to them
-CREATE POLICY suborders_seller_select ON sub_orders FOR SELECT USING (
-  seller_id IN (SELECT id FROM sellers WHERE user_id = auth.uid())
-);
-
--- PRODUCTS: Public read for active products; seller manages own
+-- PRODUCTS: Public read for active products
 CREATE POLICY products_public_read ON products FOR SELECT USING (status = 'active');
-CREATE POLICY products_seller_manage ON products FOR ALL USING (
-  seller_id IN (SELECT id FROM sellers WHERE user_id = auth.uid())
-);
 
 -- MEMBERSHIPS: Users manage own membership
 CREATE POLICY memberships_select_own ON memberships FOR SELECT USING (
@@ -2076,6 +1983,20 @@ This matrix maps every PRD requirement ID to its corresponding architecture comp
 | §4.17 | Empty State / Error State | `components/wellness-ui/empty-state.tsx` |
 | §5 | Motion & Animation | `components/external/` (all files) |
 | §6 | Iconography (Lucide) | `/public/assets/icons/` |
+
+---
+
+## 12. Future CMS Admin Dashboard Specifications
+
+A Headless CMS (e.g., Sanity, Strapi, or Supabase custom admin) will be integrated in Phase 4 to manage home page curation, editorial content, and dynamic banners. The current Phase 1–3 architecture must facilitate this future upgrade gracefully with zero refactoring overhead.
+
+### 12.1 Content Abstraction Architecture
+- **No Deep JSX Hardcoding:** Hardcode minimal text in structural components. Where text like "Our Story" or dynamic promotional banners are utilized, establish them via localized constant files or abstracted configuration objects that can be later replaced with an API fetch call.
+- **Component Pluggability:** Sections like the `HeroSlider` or `TrendingProducts` must cleanly separate data from rendering. Accept structured data props (e.g., `images[]`, `headlines`, `ctas`). Do NOT bury content strings deep inside `.map()` loops.
+
+### 12.2 Database Extensibility rules
+- **Table Nomenclature:** When creating Supabase tables for anything editorial, prefix them with `cms_` or `content_` (e.g., `cms_promo_banners`, `content_hero_slides`). Do not mix them with transactional data (`orders`, `users`).
+- **Draft Previews Check:** Any data-fetching mechanism designed for future editorial content MUST account for a potential "draft" mode bypass via standard CMS mechanisms. Implement `is_published: boolean` flags on any content-oriented Supabase schema moving forward.
 
 ---
 
